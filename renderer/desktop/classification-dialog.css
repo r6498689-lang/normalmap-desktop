@@ -1,0 +1,442 @@
+/*
+ * classification-dialog.css — 逐张分类弹窗
+ * 只新增样式，不改上游布局。深色底、可换行、底部按钮始终可达。
+ */
+
+body.nmo-modal-open {
+	overflow: hidden;
+}
+
+.nmo-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.72);
+	font-family: "Open Sans", "Microsoft YaHei", Arial, sans-serif;
+	color: #f2f2f2;
+}
+
+.nmo-modal__body {
+	display: flex;
+	flex-direction: column;
+	width: min(760px, calc(100vw - 48px));
+	max-height: calc(100vh - 48px);
+	background: #171717;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 10px;
+	box-shadow: 0 18px 48px rgba(0, 0, 0, 0.6);
+	overflow: hidden;
+}
+
+.nmo-modal__header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 16px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	background: #1d1d1d;
+}
+
+.nmo-modal__title {
+	margin: 0;
+	flex: 1;
+	text-align: center;
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+}
+
+.nmo-modal__counter {
+	margin: 10px 16px 0;
+	font-size: 12px;
+	color: #9fd0ff;
+}
+
+.nmo-modal__stage {
+	position: relative;
+	margin: 10px 16px 0;
+	height: 260px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #0e0e0e;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.nmo-modal__image {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+	display: block;
+}
+
+.nmo-modal__image.is-hidden {
+	display: none;
+}
+
+.nmo-modal__stage-note {
+	position: absolute;
+	margin: 0;
+	font-size: 12px;
+	color: #bdbdbd;
+}
+
+.nmo-modal__meta {
+	padding: 8px 16px 0;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.nmo-modal__filename {
+	margin: 0;
+	color: #fff;
+	font-weight: 600;
+	word-break: break-all;
+}
+
+.nmo-modal__current {
+	margin: 2px 0 0;
+	color: #a9a9a9;
+	word-break: break-all;
+}
+
+.nmo-modal__error {
+	margin: 8px 16px 0;
+	padding: 10px 12px;
+	border: 1px solid #e05a4f;
+	border-radius: 6px;
+	background: rgba(224, 90, 79, 0.12);
+}
+
+.nmo-modal__error-text {
+	margin: 0 0 8px;
+	font-size: 12px;
+	word-break: break-all;
+}
+
+.nmo-modal__error-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.nmo-modal__categories {
+	flex: 1 1 auto;
+	min-height: 96px;
+	margin: 10px 16px 0;
+	padding: 8px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+	gap: 6px;
+	align-content: start;
+	overflow-y: auto;
+	background: #121212;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 6px;
+}
+
+.nmo-cat {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1px;
+	padding: 6px 8px;
+	background: #232323;
+	color: #eaeaea;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 5px;
+	cursor: pointer;
+	text-align: left;
+	font-family: inherit;
+}
+
+/* 每个标签一格：自定义标签右侧叠一个删除按钮，内置标签没有。 */
+.nmo-cat-cell {
+	position: relative;
+	display: flex;
+	min-width: 0;
+}
+
+.nmo-cat-cell > .nmo-cat {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.nmo-cat.is-deletable {
+	padding-right: 26px;
+}
+
+.nmo-cat__del {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	line-height: 1;
+	background: transparent;
+	color: #9b9b9b;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	font-family: inherit;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.nmo-cat__del:hover:not(:disabled) {
+	color: #ff8a80;
+	border-color: rgba(255, 138, 128, 0.45);
+	background: rgba(224, 90, 79, 0.12);
+}
+
+.nmo-cat__del:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}
+
+.nmo-cat:hover:not(:disabled) {
+	background: #2d2d2d;
+	border-color: rgba(255, 255, 255, 0.28);
+}
+
+.nmo-cat:focus-visible,
+.nmo-btn:focus-visible,
+.nmo-input:focus-visible {
+	outline: 2px solid #4c9dff;
+	outline-offset: 2px;
+}
+
+.nmo-cat:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.nmo-cat.is-selected {
+	background: #14324f;
+	border-color: #4c9dff;
+}
+
+.nmo-cat__label {
+	font-size: 12.5px;
+}
+
+.nmo-cat__value {
+	font-size: 10.5px;
+	color: #9b9b9b;
+}
+
+.nmo-cat__check {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+}
+
+.nmo-modal__custom {
+	padding: 8px 16px 0;
+}
+
+/* 删除标签的二次确认条 */
+.nmo-modal__remove {
+	margin: 8px 16px 0;
+	padding: 10px 12px;
+	border: 1px solid rgba(224, 90, 79, 0.55);
+	border-radius: 6px;
+	background: rgba(224, 90, 79, 0.08);
+}
+
+.nmo-modal__remove-text {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.55;
+	word-break: break-all;
+}
+
+.nmo-modal__custom-form {
+	margin-top: 6px;
+	padding: 8px;
+	border: 1px dashed rgba(255, 255, 255, 0.25);
+	border-radius: 6px;
+}
+
+.nmo-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 5px 8px;
+	background: #0f0f0f;
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	border-radius: 4px;
+	font-family: inherit;
+	font-size: 12.5px;
+}
+
+.nmo-modal__custom-preview {
+	margin: 6px 0 0;
+	font-size: 11.5px;
+	color: #9fd0ff;
+	word-break: break-all;
+}
+
+.nmo-modal__custom-preview.is-error,
+.nmo-modal__custom-error {
+	color: #ff8a80;
+}
+
+.nmo-modal__custom-error {
+	margin: 6px 0 0;
+	font-size: 11.5px;
+}
+
+.nmo-modal__custom-actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.nmo-modal__footer {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 16px;
+	margin-top: 10px;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	background: #1d1d1d;
+}
+
+.nmo-btn {
+	padding: 6px 14px;
+	min-width: 78px;
+	background: #2b2b2b;
+	color: #f0f0f0;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 5px;
+	font-family: inherit;
+	font-size: 12.5px;
+	cursor: pointer;
+}
+
+.nmo-btn:hover:not(:disabled) {
+	background: #353535;
+}
+
+.nmo-btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.nmo-btn--primary {
+	background: #2563a8;
+	border-color: #3c86d8;
+}
+
+.nmo-btn--primary:hover:not(:disabled) {
+	background: #2d71bd;
+}
+
+.nmo-btn--ghost {
+	background: transparent;
+}
+
+.nmo-btn--icon {
+	min-width: 32px;
+	padding: 2px 8px;
+	font-size: 16px;
+	line-height: 1.2;
+	background: transparent;
+}
+
+.nmo-btn--outline {
+	background: transparent;
+	border-style: dashed;
+}
+
+.nmo-btn--danger {
+	background: #6b2323;
+	border-color: #b4453c;
+}
+
+/* 窄窗口：弹窗内部滚动，底部按钮仍在视野内。 */
+@media (max-height: 720px) {
+	.nmo-modal__stage {
+		height: 180px;
+	}
+}
+
+/* ---------- 导出前清单 ---------- */
+.nmo-modal__body--wide {
+	width: min(900px, calc(100vw - 48px));
+}
+
+.plan-table-wrap {
+	max-height: 320px;
+	overflow: auto;
+	margin: 8px 16px 0;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 6px;
+}
+
+.plan-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 12px;
+}
+
+.plan-table th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	padding: 6px 8px;
+	text-align: left;
+	font-weight: 600;
+	color: #cfcfcf;
+	background: #1d1d1d;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.plan-table td {
+	padding: 4px 8px;
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	vertical-align: top;
+}
+
+.plan-name {
+	color: #9fd0ff;
+	font-family: Consolas, "Courier New", monospace;
+	word-break: break-all;
+}
+
+.plan-num {
+	color: #ffd479;
+	font-family: Consolas, "Courier New", monospace;
+}
+
+.plan-options {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 8px 16px 0;
+	font-size: 12px;
+}
+
+.plan-dir {
+	color: #bdbdbd;
+	word-break: break-all;
+}
+
+.plan-supplement {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.plan-suite {
+	width: auto;
+	max-width: 360px;
+}

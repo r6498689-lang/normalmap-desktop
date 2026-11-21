@@ -1,0 +1,1957 @@
+/*
+ * desktop.css — desktop-only additions.
+ * Nothing here restyles the upstream UI; it only adds what a windowed app
+ * needs: a horizontal scroll fallback for narrow windows, a status line, and
+ * a visible "this link leaves the app" marker.
+ */
+
+/* Upstream layout is three fixed 338px columns (~1084px including the two
+   collapse handles). Below that width the window must still be usable, so the
+   document keeps its natural width and the viewport scrolls instead of
+   clipping the left column. */
+html {
+	overflow-x: auto;
+	overflow-y: auto;
+}
+
+body {
+	min-width: 1104px;
+}
+
+/* Export feedback: bottom-right, never covers the working area. */
+#nmo_status {
+	position: fixed;
+	right: 16px;
+	bottom: 16px;
+	max-width: 520px;
+	padding: 0;
+	margin: 0;
+	font-family: "Open Sans", Arial, sans-serif;
+	font-size: 12px;
+	line-height: 1.45;
+	color: #fff;
+	background: rgba(18, 18, 18, 0.94);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 6px;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+	white-space: pre-line;
+	display: none;
+	z-index: 9999;
+	pointer-events: none;
+	padding: 10px 14px;
+}
+
+#nmo_status.nmo_status_visible {
+	display: block;
+}
+
+#nmo_status.ok {
+	border-color: #4caf50;
+	box-shadow: 0 4px 14px rgba(76, 175, 80, 0.35);
+}
+
+#nmo_status.error {
+	border-color: #e05a4f;
+	box-shadow: 0 4px 14px rgba(224, 90, 79, 0.4);
+}
+
+#nmo_status.info {
+	border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* External links: the upstream site assumed you were already online. */
+a.nmo_online_link::after {
+	content: " ↗ 需联网";
+	font-size: 10px;
+	opacity: 0.85;
+	white-space: nowrap;
+}
+
+.nmo_buildinfo {
+	position: fixed;
+	right: 10px;
+	bottom: 2px;
+	font-size: 10px;
+	color: rgba(255, 255, 255, 0.55);
+	z-index: 5;
+	pointer-events: none;
+}
+
+/* The upstream footer is position:fixed, and the "Need a Texture?" badge is
+   absolutely positioned with a -200px offset — both assume a very wide browser
+   viewport. In a window they land on top of the Feedback block. Keep the same
+   content and styling, but let them flow after the panel instead of floating. */
+footer,
+footer p {
+	position: static;
+}
+
+footer {
+	padding: 2px 18px 2px;
+	font-size: 11px;
+	margin: 0;
+}
+
+footer p {
+	margin: 0;
+	font-size: 11px;
+	line-height: 1.4;
+}
+
+div.texture_link {
+	position: static;
+	display: block;
+	width: max-content;
+	margin: 14px auto 0 auto;
+}
+
+/* ---------------------------------------------------------------------------
+ * Chinese UI
+ *
+ * Open Sans has no CJK glyphs, so every Chinese character would otherwise be
+ * drawn with whatever fallback the machine happens to pick. Keep Latin in
+ * Open Sans (the original design) and hand CJK to the Windows system font.
+ * ------------------------------------------------------------------------- */
+body,
+body * {
+	font-family: "Open Sans", "Microsoft YaHei", "微软雅黑", "PingFang SC", "Noto Sans SC", sans-serif;
+}
+
+/* The four help panels set font-family:Georgia inline, which would win over
+   any normal rule and render CJK through a serif fallback. */
+#normalmaponline_help,
+#normalmaponline_help *,
+#batch_mode_help,
+#batch_mode_help *,
+#heightmap_help,
+#heightmap_help *,
+#photo_help,
+#photo_help * {
+	font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Noto Sans SC", sans-serif !important;
+}
+
+/* Replaces images/drag_drop.png, whose English text was baked into the bitmap.
+   Kept at the original 142x105 footprint so the flex row does not shift. */
+div.drop_hint {
+	box-sizing: border-box;
+	width: 142px;
+	height: 105px;
+	/* The replaced PNG had transparent padding above the lettering; without it
+	   the text starts far enough up to collide with the row above. */
+	padding-top: 36px;
+	text-align: center;
+	line-height: 1.05;
+	user-select: none;
+	pointer-events: none;
+}
+
+div.drop_hint span {
+	display: block;
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: 3px;
+	color: #ffffff;
+	-webkit-text-stroke: 1px #1b1b1b;
+}
+
+div.drop_hint span.drop_hint_arrow {
+	margin-top: 2px;
+	font-size: 26px;
+	line-height: 1;
+	letter-spacing: 0;
+	color: #111111;
+	-webkit-text-stroke: 0;
+}
+
+/* The batch row has four labels in a 186px cell. Chinese labels are shorter
+   than the English ones individually, but the checkbox + label boxes still
+   add up past the cell width and wrap onto a second line, which pushes the
+   drop hint up into the row above. Tighten the row just enough to keep the
+   original single line. */
+#batch_settings div[style*="flex-wrap"] {
+	gap: 5px 3px !important;
+}
+
+#batch_settings label {
+	white-space: nowrap;
+	font-size: 12px;
+}
+
+/* PBR 贴图与 ORM：放在批量面板下方，独立一行，不挤动表格行高。 */
+#pbr_outputs {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 4px 8px;
+	padding: 6px 10px 2px 20px;
+	font-size: 12px;
+	color: #eee;
+}
+
+#pbr_outputs .pbr_title {
+	color: #bbb;
+}
+
+#pbr_outputs label {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	white-space: nowrap;
+}
+
+button.orm_btn {
+	padding: 2px 8px;
+	font-size: 11.5px;
+	color: #ddd;
+	background: #2a2a2a;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+button.orm_btn[aria-pressed="true"] {
+	color: #10233a;
+	background: #6fb4ff;
+	border-color: #a8d2ff;
+	font-weight: 700;
+}
+
+button.orm_btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+#pbr_outputs .pbr_hint {
+	font-size: 10.5px;
+	color: #8f8f8f;
+}
+
+
+/* PBR 参数面板：窄窗也能换行，不与批量表抢宽度。 */
+#pbr_panel {
+	padding: 2px 10px 6px 20px;
+	font-size: 11.5px;
+	color: #e6e6e6;
+}
+
+.pbr_row {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 4px 6px;
+	margin-top: 4px;
+}
+
+.pbr_label {
+	width: 44px;
+	color: #bbb;
+}
+
+.pbr_select {
+	max-width: 108px;
+	font-size: 11.5px;
+	padding: 1px 2px;
+}
+
+.pbr_num {
+	width: 44px;
+	font-size: 11.5px;
+	padding: 1px 2px;
+}
+
+.pbr_slider {
+	width: 78px;
+}
+
+.pbr_check {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	white-space: nowrap;
+	color: #cfcfcf;
+}
+
+.pbr_btn {
+	padding: 1px 6px;
+	font-size: 11px;
+	color: #ddd;
+	background: #2a2a2a;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.pbr_thumb {
+	width: 44px;
+	height: 44px;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 3px;
+	image-rendering: pixelated;
+	background: #050505;
+}
+
+.pbr_resample {
+	padding: 4px 6px;
+	border: 1px dashed #d8a13a;
+	border-radius: 4px;
+	color: #f0c97a;
+}
+
+/* ==================================================================
+ * 1.1.2 布局：两行三列
+ *
+ * 第一行：输入 + 下载 / 参数 / 预设·编号·3D 设置
+ * 第二行：高度图预览 / 贴图预览 / 3D 预览   ← 三个并排
+ *
+ * 1.1.1 的“3D 设置横贯一行”已取消：那一条把三个预览整体推低 36px，
+ * 右栏还空着一大块。现在 3D 设置收进右栏、下载区收进左栏。
+ * 左右两栏都撑满行高、底部控件钉在同一条线上 —— 切换选项卡时
+ * 参数表在 76…175px 之间变，行高却不再跟着变（原来整排预览跳 99px）。
+ *
+ * 也不再靠 float + 负 margin 拼版：index.html 里那处
+ * `position:relative; bottom:30px` 曾把“法线/置换”两个勾选框盖住，
+ * 导致它们点不了（证据见 evidence/ui-round2/hit-test-2026-11-17.json）。
+ * ================================================================== */
+
+body {
+	overflow-x: auto;
+}
+
+div.content {
+	display: grid;
+	padding: 8px 10px;
+	grid-template-columns: 340px minmax(400px, 540px) 340px;
+	grid-template-rows: auto auto;
+	gap: 8px 12px;
+	justify-content: center;
+	align-items: start;
+	min-width: 1120px;
+}
+
+.cell {
+	min-width: 0;
+}
+
+#column_height  { grid-area: 1 / 1; }
+#cell_params    { grid-area: 1 / 2; }
+#cell_library   { grid-area: 1 / 3; }
+#cell_heightmap { grid-area: 2 / 1; }
+#cell_texture   { grid-area: 2 / 2; }
+#cell_3d        { grid-area: 2 / 3; }
+
+/* 左栏撑满行高，“下载区”钉在行底 */
+#column_height {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+}
+
+#column_height > * {
+	flex: 0 0 auto;
+}
+
+#download_box {
+	margin-top: auto;
+}
+
+/* 参数区高度固定：六张表原高 76…175px，取最高的那张再留 5px。
+   表高的差异只体现在表格内部，下面的“恢复默认”不再跟着上下跳。 */
+#cell_params > .column_top {
+	min-height: 180px;
+}
+
+/* 参数表按内容撑高；固定 200px 会裁掉行 */
+#cell_params .column_top,
+#batch_settings {
+	height: auto;
+}
+
+#cell_params .options_top {
+	width: 100%;
+}
+
+/* 三个预览在自己的格子里居中 */
+#cell_heightmap .view,
+#cell_texture .view,
+#cell_3d .view {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* 1.1.6 来源行：下拉在左，“导入贴图…”贴右端（用户截图红框的位置）。
+   原来是单独一行，搬上来后把那一行让给“预设”。 */
+#roughness_settings .source_row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding-right: 3px;
+}
+
+#roughness_settings .source_row .pbr_btn {
+	margin-left: auto;
+	white-space: nowrap;
+}
+
+/* ORM 按钮与“恢复默认”同一角落，外观同为普通按钮 */
+#reset_row {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+	padding: 2px 2px 0 0;
+}
+
+#pbr_status {
+	display: block;
+	padding: 0 2px 6px;
+	text-align: right;
+}
+
+/* 3D 设置（1.1.2：收进右栏，在“预设与编号”下面） */
+.cell--3dtools {
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px solid rgba(255, 255, 255, 0.14);
+	font-size: 12px;
+}
+
+.d3_tools_label {
+	display: block;
+	margin-bottom: 6px;
+	color: #ddd;
+	font-weight: 600;
+}
+
+.d3_tools_label i {
+	font-style: normal;
+	font-size: 0.85em;
+	font-weight: 400;
+	color: #9c9c9c;
+}
+
+.d3_tools {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	min-width: 0;
+}
+
+.d3_row {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 3px 5px;
+}
+
+.d3_label {
+	width: 26px;
+	color: #bbb;
+}
+
+.d3_check {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	white-space: nowrap;
+}
+
+.d3_slider {
+	width: 62px;
+}
+
+/* 预设与编号列 */
+.cell--library {
+	padding: 2px 2px 0;
+	font-size: 12px;
+}
+
+.cell_title {
+	margin: 0 0 6px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #ddd;
+}
+
+.cell_note {
+	margin: 8px 0 4px;
+	font-size: 11px;
+	line-height: 1.5;
+	color: #aaa;
+}
+
+.side_row {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 4px 6px;
+	margin-bottom: 4px;
+}
+
+.side_input {
+	width: 96px;
+	font-size: 12px;
+	padding: 1px 3px;
+}
+
+/* 拖放提示：正常流排列，不再用负偏移（那会把上一行的勾选框盖住） */
+.drop_row {
+	display: flex;
+	align-items: flex-end;
+	gap: 8px;
+}
+
+/* 1.1.4：下载区与拖放提示互换位置。提示现在贴在左栏最下面，
+   紧挨着下方的“高度图”预览框，拖文件的目标和预览对得上。 */
+#drop_area {
+	padding: 6px 0 0 4px;
+	border-top: 1px solid rgba(255, 255, 255, 0.14);
+	justify-content: flex-start;
+	cursor: pointer;
+}
+
+/* .pbr_row 是 flex，默认会盖掉 [hidden]，这里显式关掉 */
+.pbr_resample[hidden] {
+	display: none !important;
+}
+
+/* ==================================================================
+ * 垂直空间：1486x924 下必须一屏放得下
+ * 实测（evidence/ui-round2 记录）：不压缩时 scrollHeight 1568，比窗口高 680。
+ * 三处来源：品牌图 232、内容 934（3D 设置换行过多）、底部推广块 234。
+ * ================================================================== */
+
+/* 1) 品牌图从 400x200 缩到高 130，仍保留识别度 */
+img[src*="nmap_logo_trans_small"] {
+	height: 90px;
+	width: auto;
+}
+
+/* 2) 底部“需要贴图？”是外链推广，改成固定悬浮，不再把页面撑高 */
+div.texture_link {
+	position: fixed;
+	left: 10px;
+	bottom: 56px;
+	margin: 0;
+	z-index: 0;
+}
+
+/* 3) 隐藏的 file 输入用 visibility:hidden 仍占布局宽度（实测 259px），
+   会把 3D 设置撑成一堆行。display:none 仍可被 .click() 触发。 */
+.cell--3dtools input[type="file"] {
+	display: none !important;
+}
+
+.cell--3dtools select,
+.cell--3dtools input[type="button"] {
+	font-size: 12px;
+}
+
+/* 下载区（左栏底部）：与 3D 设置那条一样，用上边框跟上面的内容分开 */
+#download_box {
+	padding-top: 10px;
+	border-top: 1px solid rgba(255, 255, 255, 0.14);
+	text-align: center;
+}
+
+#download_box #file_name {
+	width: 56%;
+	max-width: 190px;
+}
+
+#download_box #file_type {
+	margin-left: 4px;
+}
+
+/* 贴图选项卡与下方的预览框左对齐：
+   预览框是 260 + 8*2 padding + 1*2 border = 278 宽，外加 8px 外边距，
+   所以容器取 294、选项卡取 278 并右移 8 —— 法线的左边框正好压在框线上。 */
+.texture_container {
+	width: 294px;
+	margin: 0 auto;
+}
+
+.texture_container .tabs {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	width: 278px;
+	margin-left: 8px;
+	text-align: left;
+}
+
+.texture_container .tabs .tab_button {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
+
+/* 预览框内的“垂直居中占位块”。上游按 300px 画布写了 min-height:300px，
+   而画布早已缩到 260（NMO_FileDrop.container_height）：不改的话，
+   每一张纹理预览都会比框内顶边低 (300-260)/2 = 20px，并且从框底溢出 20px。
+   高度图预览没有这个占位块，于是两个框看起来一高一低（用户 2026-11-18 截图）。
+   占位块与画布同高时，画布正好落在框内，和高度图预览对齐。 */
+.view .helper {
+	min-height: 260px;
+}
+
+/* 尺寸行：问号/叹号放在行的右端，尺寸文字仍然居中；行宽与预览框对齐 */
+#size_row {
+	position: relative;
+	width: 278px;
+	margin: 4px auto 0;
+	text-align: center;
+}
+
+#size_row .size_help {
+	position: absolute;
+	right: 2px;
+	top: 50%;
+	transform: translateY(-50%);
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+#size_row .size_help img {
+	display: block;
+	width: 24px;
+	height: 24px;
+}
+
+/* size=30 的原生宽度会把“尺寸：512 x 512”挤成两行 */
+#size_row #size {
+	width: 170px;
+}
+
+/* “需要贴图？”是上游的外链推广，宽度放不进两行三列，直接收起来。
+   内容仍在 DOM 里，需要时可把这条删掉恢复。 */
+div.texture_link {
+	display: none;
+}
+
+/* ==================================================================
+ * 1.1.8 视觉紧凑化
+ *
+ * 三件事：
+ *   1. 顶栏从 130px 的图片区压成 58px 一条，参数区整体上移；
+ *   2. 面板收成 1184px 居中卡片，不再整屏铺开、把三列摊在中间的空白里；
+ *   3. 控件统一成 22–24px 的深色小尺寸，表格、右栏、拖放区各收一档间距。
+ *
+ * 只改外观：所有 id / 结构 / 行为不动，几何断言（选项卡与预览框对齐、
+ * 六档切换不跳动）仍然成立。
+ * ================================================================== */
+
+/* 0) 背景（1.1.10）：用户要求恢复原样 —— 这里不再覆盖 body 背景，
+   交给 renderer/style.css 里上游原来的那条：
+   background: url('./images/background.jpg'); background-size: cover;
+   （1.1.8 曾加过一层黑色压暗 + fixed，已撤掉；版式仍是居中卡片） */
+
+/* 1) 顶栏 */
+.app_header {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	height: 58px;
+}
+
+.app_header .app_logo {
+	display: block;
+	height: 52px;
+	width: auto;
+}
+
+.app_header .app_tag {
+	align-self: flex-end;
+	margin-bottom: 15px;
+	font-size: 11px;
+	letter-spacing: 0.6px;
+	color: rgba(255, 255, 255, 0.72);
+}
+
+.app_header .app_help {
+	position: absolute;
+	top: 50%;
+	right: 16px;
+	transform: translateY(-50%);
+	line-height: 0;
+	opacity: 0.9;
+}
+
+.app_header .app_help img {
+	display: block;
+	width: 22px;
+	height: 22px;
+}
+
+/* 2) 面板：宽度跟着内容走，居中，不再整屏铺开 */
+div.content {
+	width: max-content;
+	max-width: calc(100vw - 16px);
+	margin: 4px auto 8px;
+	padding: 10px 12px;
+	grid-template-columns: 360px 400px 380px;
+	gap: 8px 10px;
+	background: rgba(8, 11, 16, 0.88);
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 12px;
+	box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5);
+}
+
+/* 3) 上排三栏各自成卡片；预览行不加卡片，免得边框套边框 */
+#column_height,
+#cell_params,
+#cell_library {
+	padding: 8px 10px;
+	background: rgba(255, 255, 255, 0.035);
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 9px;
+}
+
+/* 卡片里的上游小面板（.column_top 自带背景/圆角/阴影）拍平，避免双层边框 */
+#batch_settings,
+#cell_params .column_top {
+	padding: 0;
+	background: none;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+/* 4) 参数表：行高与缩进收一档，标签贴近控件 */
+#cell_params table.options_top {
+	border-spacing: 0;
+}
+
+.cell td.option_text {
+	padding: 0 10px 0 2px;
+	font-size: 12px;
+	color: #c6d2df;
+}
+
+#cell_params td.options {
+	padding: 2px 0;
+}
+
+/* 5) 输入控件统一：深色底、1px 边、22px 高（原来是白底原生框，和深色面板打架） */
+#cell_params input[type="number"],
+#cell_params input[type="text"],
+#cell_params select,
+#download_box input[type="text"],
+#download_box input[type="number"],
+#download_box select,
+.cell--library input[type="text"],
+.cell--library select,
+.cell--3dtools select,
+.cell--3dtools input[type="number"] {
+	box-sizing: border-box;
+	height: 22px;
+	padding: 0 5px;
+	font-size: 12px;
+	color: #e9eef5;
+	background: rgba(0, 0, 0, 0.38);
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 5px;
+	outline: none;
+}
+
+#cell_params select,
+.cell--library select {
+	padding: 0 4px;
+}
+
+#cell_params input[type="number"]:focus,
+#cell_params input[type="text"]:focus,
+#cell_params select:focus,
+#download_box input:focus,
+#download_box select:focus,
+.cell--library input:focus,
+.cell--library select:focus,
+.cell--3dtools select:focus,
+.cell--3dtools input[type="number"]:focus {
+	border-color: rgba(74, 144, 255, 0.75);
+}
+
+/* 预设下拉在“预设”行里独占一行，给宽一点，别留半行空白 */
+#rough_preset {
+	width: 62%;
+	max-width: none;
+}
+
+#cell_params input[type="range"] {
+	height: 18px;
+	margin: 0;
+	accent-color: #4a90ff;
+}
+
+/* 6) 按钮统一（选项卡除外，它们有单独的 .tab_button 规则） */
+.cell button,
+.cell input[type="button"]:not(.tab_button) {
+	height: 24px;
+	padding: 0 9px;
+	font-size: 12px;
+	color: #dbe4ef;
+	background: rgba(255, 255, 255, 0.07);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.cell button:hover,
+.cell input[type="button"]:not(.tab_button):hover {
+	background: rgba(255, 255, 255, 0.13);
+}
+
+.cell button:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+
+/* 下载是主操作，给个强调色 */
+#download,
+#download_all {
+	color: #fff;
+	background: linear-gradient(180deg, #4a90ff, #2f6fd8);
+	border-color: #5a9bff;
+}
+
+#download:hover,
+#download_all:hover {
+	background: linear-gradient(180deg, #5a9bff, #3a7ce6);
+}
+
+/* “下载 + 全部”合计 200px，导出清单也取 200，三个按钮左右两边对齐 */
+#export_plan_btn {
+	width: 200px !important;
+}
+
+/* 7) 左栏：拖放区改成一条虚线框，不再是一大块空白 */
+#drop_area {
+	margin: 8px 0 2px;
+	padding: 0;
+	border-top: none;
+}
+
+#drop_area .drop_hint {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1px;
+	box-sizing: border-box;
+	width: 100%;
+	height: 62px;
+	padding: 0;
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px dashed rgba(255, 255, 255, 0.22);
+	border-radius: 8px;
+	transition: border-color 0.15s, background 0.15s;
+}
+
+#drop_area:hover .drop_hint {
+	background: rgba(74, 144, 255, 0.09);
+	border-color: rgba(74, 144, 255, 0.7);
+}
+
+#drop_area .drop_hint span {
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 1px;
+	color: #c9d4e2;
+	-webkit-text-stroke: 0;
+}
+
+#drop_area .drop_hint span.drop_hint_arrow {
+	margin-top: 0;
+	font-size: 12px;
+	color: #8fa3ba;
+}
+
+#download_box {
+	padding-top: 8px;
+	margin-top: auto;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#download_box #file_name {
+	width: 56%;
+	max-width: 180px;
+}
+
+/* 8) 预览：深色内凹框 + 轻边框，替换上游的白框 */
+div.view {
+	background: rgba(0, 0, 0, 0.42);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 8px;
+	box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.45);
+}
+
+/* 选项卡：白底黑边的小方块 → 扁平分段按钮，选中用强调色 */
+input.tab_button {
+	height: 25px;
+	padding: 0 8px;
+	font-size: 12px;
+	color: #a9b7c8;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 5px;
+}
+
+input.tab_button:hover:not(:disabled) {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+input.tab_button:disabled {
+	color: #fff;
+	background: rgba(74, 144, 255, 0.22);
+	border: 1px solid rgba(74, 144, 255, 0.55);
+	border-radius: 5px;
+}
+
+/* 高度图/照片两个选项卡与下方预览框左对齐（和贴图那排同一套数字） */
+#cell_heightmap > .tabs {
+	display: flex;
+	justify-content: flex-end;
+	gap: 2px;
+	width: 278px;
+	height: auto;
+	margin: 0 auto 4px;
+}
+
+/* 9) 右栏：字号与行距收一档，小灰字提高对比 */
+.cell--library {
+	padding-top: 2px;
+	font-size: 12px;
+}
+
+.cell_title {
+	margin: 0 0 5px;
+	font-size: 12.5px;
+	letter-spacing: 0.3px;
+	color: #e6ecf4;
+	text-align: left;
+}
+
+.cell_note {
+	margin: 6px 0 4px;
+	font-size: 11px;
+	line-height: 1.45;
+	color: #93a0af;
+	text-align: left;
+}
+
+.side_row {
+	gap: 4px 5px;
+	margin-bottom: 3px;
+}
+
+.cell--3dtools {
+	margin-top: 10px;
+	padding-top: 8px;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.d3_tools_label {
+	display: block;
+	margin-bottom: 5px;
+	font-size: 12.5px;
+	color: #e6ecf4;
+	text-align: left;
+}
+
+.d3_tools {
+	gap: 3px;
+}
+
+.d3_row {
+	gap: 4px;
+}
+
+.d3_label {
+	width: 30px;
+	font-size: 11.5px;
+	color: #93a0af;
+}
+
+.d3_check {
+	gap: 2px;
+	font-size: 11.5px;
+	color: #cfd9e5;
+}
+
+.d3_slider {
+	width: 56px;
+}
+
+/* 10) 参数框底部状态行 */
+#pbr_status {
+	padding: 0 2px 2px;
+	font-size: 11px;
+	color: #8b98a6;
+}
+
+/* 11) 复选框：原生白方块在深色面板上太扎眼，画成 14px 小方框 */
+input[type="checkbox"] {
+	-webkit-appearance: none;
+	appearance: none;
+	position: relative;
+	width: 14px;
+	height: 14px;
+	margin: 0 3px 0 0;
+	vertical-align: -2px;
+	background: rgba(0, 0, 0, 0.35);
+	border: 1px solid rgba(255, 255, 255, 0.32);
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+	background: #4a90ff;
+	border-color: #4a90ff;
+}
+
+input[type="checkbox"]:checked::after {
+	content: "";
+	position: absolute;
+	left: 3px;
+	top: 0;
+	width: 4px;
+	height: 8px;
+	border: solid #fff;
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+
+input[type="checkbox"]:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+/* 11.5) 自动旋转开关（1.1.9）：把原来的“旋转”小方框换成滑轨开关
+   —— 用户看不出那个小勾是干什么的；开关一眼能看懂开/关。
+   input 仍然保留（id=input_rot，checkbox 语义），只是视觉上藏起来。 */
+.d3_switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	white-space: nowrap;
+	cursor: pointer;
+	user-select: none;
+	position: relative;
+}
+
+#rot_switch input[type="checkbox"] {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	opacity: 0;
+	pointer-events: none;
+	/* 抵消上面 11) 画出来的 14px 小方框与对勾 */
+	background: transparent;
+	border: 0;
+}
+
+#rot_switch input[type="checkbox"]::after {
+	content: none;
+}
+
+.d3_switch_track {
+	position: relative;
+	flex: 0 0 auto;
+	width: 30px;
+	height: 16px;
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 0.5);
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.d3_switch_knob {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: #b6c2d0;
+	transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.d3_switch.is-on .d3_switch_track,
+#rot_switch input[type="checkbox"]:checked + .d3_switch_track {
+	background: #3a7ce6;
+	border-color: #4a90ff;
+}
+
+.d3_switch.is-on .d3_switch_knob,
+#rot_switch input[type="checkbox"]:checked + .d3_switch_track .d3_switch_knob {
+	transform: translateX(14px);
+	background: #fff;
+}
+
+#rot_switch input[type="checkbox"]:focus-visible + .d3_switch_track {
+	outline: 2px solid rgba(74, 144, 255, 0.6);
+	outline-offset: 2px;
+}
+
+.d3_switch_text {
+	font-size: 11.5px;
+	color: #97a4b3;
+}
+
+.d3_switch.is-on .d3_switch_text,
+#rot_switch input[type="checkbox"]:checked ~ .d3_switch_text {
+	color: #dbe7f5;
+}
+
+/* 12) 参数卡撑满行高，ORM/恢复默认与状态行钉在卡片底部（和左右两张卡同高） */
+#cell_params {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+}
+
+#cell_params > .column_top {
+	flex: 0 0 auto;
+}
+
+#cell_params #reset_row {
+	margin-top: auto;
+	padding-top: 8px;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 13) 贴图预览容器在 400px 的中列里居中（上游 div.texture_container 的 margin:0
+   比 .texture_container 更具体，之前一直是左对齐，整块偏到左边） */
+#cell_texture .texture_container {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* 14) 两排选项卡统一：取消上游 -11/-25 的负边距，三张预览的顶边才能对齐 */
+.texture_container .tabs,
+#cell_heightmap > .tabs {
+	display: flex;
+	gap: 2px;
+	height: auto;
+	margin: 0 auto 4px;
+	text-align: left;
+}
+
+/* 三张预览的顶边压在同一条线上：
+   高度图是 inline-block，外边距不合并（444+4+8=456），这里收到 4；
+   3D 预览上方没有选项卡，补 25px 等于一行选项卡的高度（419+25+8=452）。 */
+#cell_heightmap .view {
+	margin-top: 4px;
+}
+
+#cell_3d {
+	padding-top: 25px;
+}
+
+/* 15) 3D 预览的放大镜：上游写的是 position:absolute; top:210px; right:70px，
+   没有定位祖先，结果飘到右栏中间。钉回 3D 预览框右上角。 */
+#render_view {
+	position: relative;
+}
+
+a.render_magnifier {
+	top: 6px;
+	right: 6px;
+}
+
+/* 16) 批量模式那个橙色问号缩一档，别比按钮还显眼 */
+#batch_settings a.various img {
+	width: 18px;
+	height: 18px;
+	opacity: 0.85;
+}
+
+/* 17) 页脚版权：面板是居中的窄卡片，页脚跟着居中对齐，别孤零零挂在最左边 */
+footer,
+footer p {
+	text-align: center;
+}
+
+/* 1.1.10 背景恢复成原来的雪地插画后，页脚 11px 的白字压在亮色雪面上几乎看不清。
+   只加一层阴影把字托出来，位置、字号、颜色都不动。 */
+footer,
+footer p {
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+/* ==================================================================
+ * 1.1.11 字号整体放大 1px（约 8%）
+ *
+ * 用户要求：字体放大一点、左右宽度不变；如果不需要改布局，上下也不拉长。
+ * 所以这一段【只改 font-size】：
+ *   - 不动 grid 列宽、卡片宽高、控件高度、内外边距；
+ *   - 下载按钮的 height 是行内 `2em`，会随字号涨，这里钉回 24px；
+ *   - 其它控件高度都有显式 px，不受字号影响。
+ * ================================================================== */
+
+/* 标签与参数表 */
+#cell_params td.option_text,
+.cell td.option_text {
+	font-size: 13px;
+}
+
+/* 输入框、下拉框（高度仍是上面的 22px，不改） */
+#cell_params input[type="number"],
+#cell_params input[type="text"],
+#cell_params select,
+#download_box input[type="text"],
+#download_box input[type="number"],
+#download_box select,
+.cell--library input[type="text"],
+.cell--library select,
+.cell--3dtools select,
+.cell--3dtools input[type="number"] {
+	font-size: 13px;
+}
+
+/* 按钮与选项卡（高度仍是 24/25px） */
+.cell button,
+.cell input[type="button"]:not(.tab_button) {
+	font-size: 13px;
+}
+
+input.tab_button {
+	font-size: 13px;
+}
+
+/* 下载按钮：行内 2em 高度会变成 26px，钉回原值；宽度按 em 只多 8+5px，仍在列内 */
+#download,
+#download_all,
+#export_plan_btn {
+	height: 24px !important;
+}
+
+/* “不透明度”那行是行内 11px */
+#download_box #total_transparency {
+	font-size: 12px !important;
+}
+
+/* 批量与 PBR 输出 */
+#batch_settings label {
+	font-size: 13px;
+}
+
+#pbr_outputs {
+	font-size: 13px;
+}
+
+#pbr_outputs .pbr_hint {
+	font-size: 11.5px;
+}
+
+#pbr_panel {
+	font-size: 12.5px;
+}
+
+.pbr_select,
+.pbr_num {
+	font-size: 12.5px;
+}
+
+.pbr_btn {
+	font-size: 12px;
+}
+
+button.orm_btn {
+	font-size: 12.5px;
+}
+
+/* 右栏：标题、说明、3D 设置 */
+.cell--library {
+	font-size: 13px;
+}
+
+.cell_title {
+	font-size: 13.5px;
+}
+
+.cell_note {
+	font-size: 12px;
+}
+
+.d3_tools_label {
+	font-size: 13.5px;
+}
+
+.d3_label {
+	font-size: 12.5px;
+}
+
+.d3_check {
+	font-size: 12.5px;
+}
+
+.d3_switch_text {
+	font-size: 12.5px;
+}
+
+/* 参数框底部状态行 */
+#pbr_status {
+	font-size: 12px;
+}
+
+/* 拖放提示 */
+#drop_area .drop_hint span {
+	font-size: 14px;
+}
+
+#drop_area .drop_hint span.drop_hint_arrow {
+	font-size: 13px;
+}
+
+/* 页脚 */
+footer,
+footer p {
+	font-size: 12px;
+}
+
+/* 1.1.11 补：放大字号后为了“版式一像素不挪”，把行内空隙收紧同样多
+   —— 只收下面这几处，字号不回退，整体高度回到 330。 */
+
+/* 六个选项卡在 13px 下自然宽度 307px，会溢出 278px 的行；
+   内边距 8 → 5（省 36px），左边仍然贴住预览框，行高不变。 */
+input.tab_button {
+	padding: 0 5px;
+}
+
+/* 右栏说明文字由 11px 提到 12px 后每段多 3px；行高 1.45 → 1.3、上下留白各收 1px */
+.cell_note {
+	line-height: 1.3;
+	margin: 5px 0 3px;
+}
+
+.cell_title {
+	margin-bottom: 4px;
+}
+
+.side_row {
+	margin-bottom: 2px;
+}
+
+.cell--3dtools {
+	margin-top: 8px;
+}
+
+.d3_tools_label {
+	margin-bottom: 4px;
+}
+
+/* 下载区那两个 40px 数字框：13px 下 “100+步进箭头” 需要 44px，否则数字被裁 */
+#transparency_nmb,
+#file_jpg_qual_nmb {
+	width: 44px !important;
+}
+
+/* 1.1.11 补 2：上面收得略多，回填 6px，正好与 1.1.10 的 330 对齐；
+   40px 数字框改成 44px 后步进箭头仍挤，内边距收成 2px。 */
+.cell_note {
+	margin: 6px 0 4px;
+}
+
+.cell--3dtools {
+	margin-top: 10px;
+}
+
+#transparency_nmb,
+#file_jpg_qual_nmb {
+	padding: 0 2px;
+}
+
+/* 1.1.11 补 3：44px 还是不够——“100”加步进箭头要 47px，数字会被裁成“10”。
+   这两个框各占一行，放宽到 52px 不影响任何列宽或行高。 */
+#transparency_nmb,
+#file_jpg_qual_nmb {
+	width: 52px !important;
+}
+
+/* ==================================================================
+ * 1.1.12 字号再 +3px（正文 16px 档），纵向放开
+ *
+ * 用户要求：再增大 3px；需要改布局就往上/下调整（左右宽度仍不变）。
+ * 因此这一版允许变高：控件 22→28、按钮 24→30、选项卡 25→32 并允许换行，
+ * 三列宽度、卡片宽度、预览尺寸一律不动。
+ * ================================================================== */
+
+/* 1) 字号：正文与控件 16px，次级信息 15px */
+#cell_params td.option_text,
+.cell td.option_text,
+#cell_params input[type="number"],
+#cell_params input[type="text"],
+#cell_params select,
+#download_box input[type="text"],
+#download_box input[type="number"],
+#download_box select,
+.cell--library input[type="text"],
+.cell--library select,
+.cell--3dtools select,
+.cell--3dtools input[type="number"],
+.cell button,
+.cell input[type="button"]:not(.tab_button),
+input.tab_button,
+#batch_settings label,
+#pbr_outputs,
+.cell--library {
+	font-size: 16px;
+}
+
+.cell_title,
+.d3_tools_label {
+	font-size: 16.5px;
+}
+
+.cell_note {
+	font-size: 15px;
+	line-height: 1.35;
+	margin: 8px 0 6px;
+}
+
+.d3_label,
+.d3_check,
+.d3_switch_text {
+	font-size: 15px;
+}
+
+#pbr_panel,
+.pbr_select,
+.pbr_num,
+button.orm_btn {
+	font-size: 15px;
+}
+
+#pbr_outputs .pbr_hint,
+.pbr_btn {
+	font-size: 14.5px;
+}
+
+#pbr_status {
+	font-size: 14.5px;
+}
+
+#drop_area .drop_hint span {
+	font-size: 17px;
+}
+
+#drop_area .drop_hint span.drop_hint_arrow {
+	font-size: 15px;
+}
+
+footer,
+footer p {
+	font-size: 14px;
+}
+
+#download_box #total_transparency {
+	font-size: 15px !important;
+}
+
+/* 2) 纵向尺寸：控件与按钮加高，行距放开 */
+#cell_params input[type="number"],
+#cell_params input[type="text"],
+#cell_params select,
+#download_box input[type="text"],
+#download_box input[type="number"],
+#download_box select,
+.cell--library input[type="text"],
+.cell--library select,
+.cell--3dtools select,
+.cell--3dtools input[type="number"] {
+	height: 28px;
+	padding: 0 7px;
+}
+
+.cell button,
+.cell input[type="button"]:not(.tab_button) {
+	height: 30px;
+	padding: 0 11px;
+}
+
+/* 选项卡：32 高，允许换行（16px 下六个标签在 278px 里放不下一行） */
+input.tab_button {
+	height: 32px;
+	padding: 0 6px;
+}
+
+.texture_container .tabs,
+#cell_heightmap > .tabs {
+	flex-wrap: wrap;
+	row-gap: 2px;
+	height: auto;
+}
+
+/* 三个下载按钮：行内 2em 在 16px 下是 32，钉回 30，和上面统一 */
+#download,
+#download_all,
+#export_plan_btn {
+	height: 30px !important;
+}
+
+/* 参数表行距 2 → 4 */
+#cell_params td.options {
+	padding: 4px 0;
+}
+
+/* 卡片内边距 8 → 10 */
+#column_height,
+#cell_params,
+#cell_library {
+	padding: 10px 10px;
+}
+
+/* 右栏各段之间放开一档 */
+.cell_title {
+	margin-bottom: 6px;
+}
+
+.side_row {
+	margin-bottom: 4px;
+}
+
+.cell--3dtools {
+	margin-top: 12px;
+	padding-top: 10px;
+}
+
+.d3_tools_label {
+	margin-bottom: 6px;
+}
+
+/* 拖放框：17px 两行 + 箭头需要 74 */
+#drop_area .drop_hint {
+	height: 74px;
+}
+
+/* 3) 复选框 14 → 16，对勾同步放大 */
+input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	border-radius: 4px;
+}
+
+input[type="checkbox"]:checked::after {
+	left: 4px;
+	top: 1px;
+	width: 4px;
+	height: 9px;
+}
+
+/* 4) 开关：滑轨 30×16 → 34×19，圆点 10 → 13 */
+.d3_switch_track {
+	width: 34px;
+	height: 19px;
+}
+
+.d3_switch_knob {
+	width: 13px;
+	height: 13px;
+}
+
+.d3_switch.is-on .d3_switch_knob,
+#rot_switch input[type="checkbox"]:checked + .d3_switch_track .d3_switch_knob {
+	transform: translateX(15px);
+}
+
+/* 5) 数字框：16px 下 “100/0.3 + 步进箭头” 更宽，按需要放宽 */
+#transparency_nmb,
+#file_jpg_qual_nmb {
+	width: 60px !important;
+	padding: 0 3px;
+}
+
+#dm_strength_nmb {
+	width: 56px !important;
+}
+
+/* 1.1.12 补：把纵向涨出来的高度收回一点，目标是“真实窗口（内容约 921px）不出滚动条”。
+   控件 28→26、按钮 30→28、表格行距 4→3、卡片内边距 10→9，字号仍是 16px，不回退。 */
+#cell_params input[type="number"],
+#cell_params input[type="text"],
+#cell_params select,
+#download_box input[type="text"],
+#download_box input[type="number"],
+#download_box select,
+.cell--library input[type="text"],
+.cell--library select,
+.cell--3dtools select,
+.cell--3dtools input[type="number"] {
+	height: 26px;
+	padding: 0 6px;
+}
+
+.cell button,
+.cell input[type="button"]:not(.tab_button) {
+	height: 28px;
+}
+
+#download,
+#download_all,
+#export_plan_btn {
+	height: 28px !important;
+}
+
+#cell_params td.options {
+	padding: 3px 0;
+}
+
+#column_height,
+#cell_params,
+#cell_library {
+	padding: 9px 10px;
+}
+
+.cell_note {
+	line-height: 1.28;
+}
+
+.cell_title {
+	margin-bottom: 5px;
+	line-height: 1.25;
+}
+
+.side_row {
+	margin-bottom: 3px;
+}
+
+.cell--3dtools {
+	margin-top: 10px;
+	padding-top: 9px;
+}
+
+.d3_tools_label {
+	margin-bottom: 5px;
+}
+
+#drop_area .drop_hint {
+	height: 72px;
+}
+
+/* 1.1.12 补 2：实测真实窗口内容区 1486×924（1500×960 外框），
+   再把页面压到 920 以内，保证打开程序不出现整窗滚动条。 */
+#cell_library {
+	padding-top: 0;
+}
+
+.side_row {
+	margin-bottom: 2px;
+}
+
+.cell--3dtools {
+	margin-top: 8px;
+}
+
+.cell_title {
+	margin-bottom: 4px;
+}
+
+.cell_note {
+	line-height: 1.25;
+	margin: 7px 0 5px;
+}
+
+div.content {
+	gap: 6px 10px;
+}
+
+.app_header {
+	height: 54px;
+}
+
+.app_header .app_logo {
+	height: 48px;
+}
+
+#drop_area .drop_hint {
+	height: 70px;
+}
+
+/* 1.1.12 补 3：六个选项卡在 16px 下如果换行，中间的预览会比左右低 41px，
+   破坏三张预览的顶边对齐。这里改为“不换行 + 收紧内边距”：
+   16px 时文字合计约 245px，加 2px 内边距与 1px 间隔 = 274px，仍在 278px 内。 */
+.texture_container .tabs {
+	flex-wrap: nowrap;
+	gap: 1px;
+}
+
+input.tab_button {
+	height: 30px;
+	padding: 0 2px;
+}
+
+/* 1.1.12 补 4：最后 6px —— 页面 894，视口 888 会多一条滚动条。
+   卡片上下内边距 10→8、说明段上下各收 1px，回到 888 整，测试视口也一屏。 */
+div.content {
+	padding: 8px 12px;
+}
+
+.cell_note {
+	margin: 6px 0 4px;
+}
+
+/* 1.1.12 补 5：16px 的选项卡只剩 1px 间隔，六个词连成一句话。
+   给每个标签一层浅色底，间隔改 2px，靠底色块区分；总宽仍控制在 278 内。 */
+input.tab_button {
+	padding: 0 1px;
+	background: rgba(255, 255, 255, 0.07);
+	border-color: rgba(255, 255, 255, 0.06);
+}
+
+input.tab_button:hover:not(:disabled) {
+	background: rgba(255, 255, 255, 0.14);
+}
+
+.texture_container .tabs {
+	gap: 2px;
+}
+
+/* 1.1.12 补 6：底部状态行 14.5px 时最后一个“（0）”会掉到第二行，
+   看起来像断句错误；收到 13.5px（仍比 1.1.11 的 12px 大）让它回到一行。 */
+#pbr_status {
+	font-size: 13.5px;
+}
+
+/* 1.1.12 补 7：状态行固定两行。
+   中文可以在任意字之间断行，靠自动折行会把“强度”拆成“强/度”（试过 balance 也一样），
+   所以由 pbr-ui.js 输出两段文字，这里只负责让它们各占一行、行高放舒服。 */
+#pbr_status {
+	line-height: 1.4;
+}
+
+#pbr_status .pbr_status_row {
+	display: block;
+}
+
+/* 1.1.12 补 8：右栏两处宽度不齐 —— “（无）”下拉只有 113px，
+   下面的预设名输入框 96px（放不下一个中文名），两行长度对不上。
+   让下拉和输入框都吃掉本行剩余宽度，三行右边缘就齐了。 */
+#preset_select {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.side_input {
+	flex: 1 1 auto;
+	width: auto;
+	min-width: 0;
+}
+
+/* 1.1.12 补 9：预设下拉改 100% 宽（flex 在只含一个子项的 side_row 里没吃满），
+   与下面“预设名 + 保存/应用”同宽，右边缘对齐。 */
+#preset_select {
+	width: 100%;
+}
+
+/* 关状态下的开关滑轨在深色卡片上几乎看不见，只剩一个圆点；
+   抬高轨道底色与描边，让人一眼看出这是个“开关”。 */
+.d3_switch_track {
+	background: rgba(255, 255, 255, 0.10);
+	border-color: rgba(255, 255, 255, 0.30);
+}
+
+/* .pbr_select 上有 max-width:108px，预设下拉因此只有 108 宽；
+   这一行只有它一个控件，放开上限让它铺到卡片宽度。 */
+#preset_select {
+	max-width: none;
+}
+
+/* ==================================================================
+ * 1.1.14 三张预览放大 5%（260 → 273），三栏收紧
+ * 1.1.15 再放大 3px（273 → 276）
+ *
+ * 用户要求：只放大这三张图、先放 5%；三张之间紧凑一点。
+ * 外框 = 276 + 8*2 padding + 1*2 border = 294，配套的容器、选项卡行、
+ * 尺寸行都要跟着改，否则选项卡会缩在框里侧。
+ * ================================================================== */
+
+/* 1) 画布与外框 */
+div.view {
+	width: 276px;
+	height: 276px;
+}
+
+.view .helper {
+	min-height: 276px;
+}
+
+.texture_container {
+	width: 310px; /* 294 + 两侧各 8px 外边距 */
+}
+
+.texture_container .tabs {
+	width: 294px;
+	justify-content: space-between; /* 六个标签恰好铺满，左右边与框对齐 */
+	gap: 1px;
+}
+
+#size_row {
+	width: 294px;
+}
+
+/* 2) 三栏收紧：左右各让 8px，中间让 8px；间距 10 → 6 */
+div.content {
+	padding: 6px 12px;
+	grid-template-columns: 352px 392px 372px;
+	gap: 6px 6px;
+}
+
+#column_height,
+#cell_params,
+#cell_library {
+	padding: 9px 6px;
+}
+
+/* 3) 让出 13px：顶栏 −6、选项卡行 −2 */
+.app_header {
+	height: 48px;
+}
+
+.app_header .app_logo {
+	height: 44px;
+}
+
+input.tab_button {
+	height: 28px;
+}
+
+/* 4) 中列参数表按新的 380 内宽再收一点，避免数字框被挤 */
+#cell_params td.option_text {
+	padding-right: 6px;
+}
+
+/* 预览长高 13px 后页面多出 8px：卡片上下内边距 9 → 7（两张卡各让 4px）。 */
+#column_height,
+#cell_params,
+#cell_library {
+	padding: 7px 6px;
+}
+
+/* 最后 4px：面板上下外边距 6 → 4。 */
+div.content {
+	padding: 4px 12px;
+}
+
+/* 1.1.14：预览框放大到 291 后，高度图那排两个选项卡还停在旧宽度 278
+   （右对齐），左右边都与下面的框对不上。跟着改成 291，左对齐。
+   1.1.15 框再宽 3px，这里同步 294。 */
+#cell_heightmap > .tabs {
+	width: 294px;
+	justify-content: flex-end;
+	margin: 0 auto 4px;
+}
+
+/* 1.1.14：选项卡行从 30 降到 28，3D 预览上方那块补偿要从 25 收到 28
+   （选项卡 28 + 外边距），三张框的顶边才继续齐平。 */
+#cell_3d {
+	padding-top: 28px;
+}
+
+/* 高度图那排两个选项卡原来右对齐，和中间那排（从左边起）不一致；
+   预览框加宽后右边空得明显，统一改成左对齐。 */
+#cell_heightmap > .tabs {
+	justify-content: flex-start;
+}
+
+/* 1.1.14：“复用粗糙度遮罩”七个字在 108px 的下拉里会被截成“复用粗糙度”，
+   单独把金属度这个下拉放宽（这一行只有它 + 反转，放得下）。 */
+#metal_mode {
+	max-width: none;
+	width: 152px;
+}
+
+/* ==================================================================
+ * 1.1.15 左侧高度图 / 中间贴图预览：滚轮缩放
+ *
+ * 画布本身仍按 276 的预览尺寸绘制，缩放走 CSS transform（preview-zoom.js）。
+ * 预览框要裁掉溢出的部分，并把角标定位在框内。
+ * ================================================================== */
+
+div.view {
+	position: relative;
+	overflow: hidden;
+}
+
+/* 缩放后画布会盖住 padding 区，这是有意的：放大时尽量把框填满 */
+#height_map > canvas,
+.texture_container .view > canvas {
+	transform-origin: 0 0;
+	will-change: transform;
+}
+
+.preview_zoom_badge {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	z-index: 3;
+	padding: 1px 5px;
+	font-size: 11px;
+	line-height: 16px;
+	color: #eaf2ff;
+	background: rgba(10, 14, 20, 0.72);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 4px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.18s ease;
+}
+
+.preview_zoom_badge.is-visible {
+	opacity: 1;
+}
+
+/* 1.1.15：预览再长高 3px，页面正好多出 3px 滚动条；把面板下外边距
+   从 8 收到 5，页面仍是一屏（888），三列不会因为滚动条横向位移。 */
+div.content {
+	margin: 4px auto 5px;
+}
+
+/* ==================================================================
+ * 1.1.27 Agent 活动徽标
+ *
+ * 只做“可见性”：AI 连着、刚刚做了什么、失败没有。
+ * fixed + pointer-events:none，不参与布局，也不挡任何控件。
+ * ================================================================== */
+
+#nmo_agent_badge {
+	position: fixed;
+	left: 10px;
+	bottom: 4px;
+	z-index: 9998;
+	display: none;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 9px;
+	font-family: "Open Sans", Arial, sans-serif;
+	font-size: 11px;
+	line-height: 1.6;
+	color: #dfe9f5;
+	background: rgba(18, 18, 18, 0.88);
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 999px;
+	pointer-events: none;
+}
+
+#nmo_agent_badge.nmo_agent_badge_visible {
+	display: inline-flex;
+}
+
+#nmo_agent_badge::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #5bd463;
+	box-shadow: 0 0 4px rgba(91, 212, 99, 0.6);
+}
+
+#nmo_agent_badge.active::before {
+	background: #f0b429;
+	box-shadow: 0 0 4px rgba(240, 180, 41, 0.7);
+}
+
+/* 给最高的粗糙度面板预留同样的行高。 */
+#cell_library { min-height: 330px; }

@@ -1,0 +1,242 @@
+{
+  "wood": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.62,
+        "rough_strength": 0.55,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "concrete": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.82,
+        "rough_strength": 0.4,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "stone": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.75,
+        "rough_strength": 0.55,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "marble": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.28,
+        "rough_strength": 0.4,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "metal": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.35,
+        "rough_strength": 0.45,
+        "rough_detail": "detail",
+        "metal_mode": "full"
+      }
+    }
+  },
+  "tiles": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.22,
+        "rough_strength": 0.3,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "brick": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.86,
+        "rough_strength": 0.3,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "paving": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.8,
+        "rough_strength": 0.4,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "asphalt": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.9,
+        "rough_strength": 0.25,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "plaster": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.8,
+        "rough_strength": 0.3,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "fabric": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.95,
+        "rough_strength": 0.2,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "carpet": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.96,
+        "rough_strength": 0.2,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "grass": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.88,
+        "rough_strength": 0.4,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "soil": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.9,
+        "rough_strength": 0.3,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "moss": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.92,
+        "rough_strength": 0.45,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "glass": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.05,
+        "rough_strength": 0.12,
+        "rough_detail": "gray",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "ice": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.18,
+        "rough_strength": 0.3,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "water": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.06,
+        "rough_strength": 0.25,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "snow": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.62,
+        "rough_strength": 0.25,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  },
+  "other": {
+    "createdAt": null,
+    "data": {
+      "controls": {
+        "rough_mode": "source",
+        "rough_value": 0.5,
+        "rough_strength": 0.3,
+        "rough_detail": "detail",
+        "metal_mode": "none"
+      }
+    }
+  }
+}

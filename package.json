@@ -1,0 +1,30 @@
+{
+  "name": "normalmap-desktop",
+  "productName": "NormalMap Desktop",
+  "version": "1.2.0",
+  "description": "Offline Windows desktop texture-map generator: normal, displacement, AO, specular, roughness, metallic and ORM packing. Forked from NormalMap-Online by Christian Petry (MIT).",
+  "main": "desktop/main.js",
+  "private": true,
+  "license": "MIT",
+  "author": "NormalMap Desktop contributors (original: Christian Petry)",
+  "keywords": [
+    "normal-map",
+    "pbr",
+    "texture",
+    "orm",
+    "electron",
+    "game-dev"
+  ],
+  "scripts": {
+    "start": "electron .",
+    "test": "node tests/run-all.js",
+    "test:packaged": "node tests/run-all.js --packaged",
+    "test:all": "node tests/run-all.js && node tests/run-all.js --packaged",
+    "fixtures": "node tests/make-fixtures.js",
+    "pack": "node build/pack.js",
+    "test:gate": "node tests/verify-test-gate.js"
+  },
+  "devDependencies": {
+    "electron": "45.3.2"
+  }
+}

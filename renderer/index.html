@@ -1,0 +1,997 @@
+<!--/*
+ * Author: Christian Petry
+ * Homepage: www.petry-christian.de
+ *
+ * License: MIT
+ * Copyright (c) 2014 Christian Petry
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or 
+ * substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="zh-CN" dir="ltr" xmlns:fb="http://ogp.me/ns/fb#">
+
+<head>
+	<meta charset="utf-8">
+
+	<!-- Desktop build: no remote origins at all. Everything the app needs is
+	     bundled under app://nmo/.
+	     'unsafe-inline' covers two upstream facts we deliberately did not
+	     refactor away: style="" attributes everywhere, and onclick="" handlers
+	     on the original controls. It does NOT allow loading code from anywhere:
+	     script sources stay self-only, and every non-app:// request is cancelled
+	     in the main process. See docs/ARCHITECTURE.md § Security. -->
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; media-src 'self' blob:; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'self'" />
+
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Expires" content="0" />
+	<meta http-equiv="reply-to" content="petry_christian@web.de">
+	<meta name="description" content="Online NormalMap Generator FREE! Create a Normalmap directly inside your browser! No Uploads required, completely client-based">
+	<meta name="author" content="Christian Petry">
+	<meta name="language" content="chinese">
+	<meta name="keywords" content="Normalmap,Normal,Mapping,Online,cpetry,github,NormalMap-Generator,Heightmap,Javascript">
+	<meta name="date" content="2014-06-28">
+	<meta name="page-topic" content="Dienstleistung">
+	<meta name="robots" content="index,follow">
+
+	<title>NormalMap-Online — 桌面版</title>
+	<link rel="icon" type="image/png" href="images/favicon.png" />
+	<link type="text/css" rel="stylesheet" href="./opensans700.css">
+	<link type="text/css" rel="stylesheet" href="./style.css">
+	<link type="text/css" rel="stylesheet" href="./desktop/desktop.css">
+	<link type="text/css" rel="stylesheet" href="./desktop/classification-dialog.css">
+</head>
+
+	
+<body style="text-align: center">
+	<!-- 1.1.8：顶栏压成一条 58px 的横条（原来是 130px 的图片区） -->
+	<div class="app_header">
+		<img class="app_logo" src="images/nmap_logo_trans_small.png" alt="NormalMap" />
+		<span class="app_tag">GPU 加速</span>
+		<a class="various app_help" href="#normalmaponline_help" title="使用说明">
+			<img src="images/help.png" alt="帮助" />
+		</a>
+	</div>
+
+	<!-- DESCRIPTION -->
+	<div id="normalmaponline_help" style="display:none;overflow:hidden;font-family:Georgia" align="left">		
+		<h1>NormalMap-Online</h1>
+		<p>
+			这个程序可以<b>免费</b>把高度图转换成法线贴图。<br/>
+			你生成的贴图都<b>归你所有</b>。<br/>
+			贴图<b>不会</b>上传到任何服务器，所有运算都在本机完成。<br/>
+			<br/>
+			把高度图<b>拖放</b>到左侧的指定区域，再调整参数即可。<br/>
+			调好后看一眼预览窗口，然后下载你自己的法线贴图。<br/>
+			此外还可以调整并下载置换贴图和环境光遮蔽贴图。<br/>
+			<br/>
+			预览窗口是一个带多种贴图的 3D 模型。<br/>
+			每种贴图都能单独开关，模型也可以切换。<br/>
+			<br/>
+			有进一步的问题，可以发邮件到页面下方的地址。<br/>
+		</p>			
+
+		<h2>法线贴图</h2>
+		<p>
+			<img src="images/normal_description.png" style="display: block; 
+				margin-left: auto; margin-right: auto; padding-left: 10px;" align="right" />
+
+			法线贴图是携带表面深度信息的贴图。<br/>
+			它不改变模型结构，对性能<b>几乎没有影响</b>。<br/>
+			每个像素代表一个<b>法线向量</b>，由三种颜色组成。<br/>
+			这三种颜色分别对应法线向量的方向。<br/>
+			<br/>
+			它能明显增强深度的视觉错觉，
+			特别适合表面有<b>凹凸或裂纹</b>的平面。<br/>
+			如右图所示，高度图描述的起伏可以转换成法线贴图，由显卡在着色器中读取。<br/>
+			如果想要更强烈的深度错觉、甚至让部分区域遮挡模型，可以试试置换贴图。<br/>
+			置换贴图会真正改变多边形，但可能明显降低性能！<br/>
+		</p>
+	</div>
+	
+	
+	<div class="content">
+	
+		<!--<div class="column_block" style="display:inline-block; vertical-align:top;">-->
+		
+		<!-- Drop box %D -->
+		<div class="cell cell--inputs" id="column_height">
+			<div class="column_top" id="batch_settings" style="width:100%;">
+				<table class="options_top" style="width: 100%; table-layout: fixed;">
+					<!-- First Row - Batch Mode -->
+					<tr>
+							<td class="option_text" style="width: 100px;">
+									<span>批量模式</span>
+							</td>
+							<td class="options" colspan="2">
+									<div style="display: flex; align-items: center;">
+											<button class="download" style="width: 10em; height: 2em;" onclick="select_multiple_height_files.click()">
+												<input id="select_multiple_height_files" type="file" accept="image/*, .tga"  onpropertychange="handleFileSelect()" 
+												style="position:absolute;visibility:hidden;" multiple>
+												选择文件
+											</button>
+											<a style="margin-left: 10px;" class="various" href="#batch_mode_help">
+													<img src="images/help.png"/>
+											</a>
+											<button id="batch_stop" class="download" style="width: 5em; height: 2em; margin-left: 8px; display:none;" type="button">停止</button>
+											<button id="batch_retry" class="download" style="width: 8em; height: 2em; margin-left: 6px; display:none;" type="button">重试失败项</button>
+									</div>
+							</td>
+					</tr>
+					
+					<!-- Second Row - Checkboxes -->
+					<tr>
+							<td class="option_text" style="display:block; width: 100px;">
+									<span>贴图类型</span>
+							</td>
+							<td class="options" colspan="2">
+								<div style="display: flex; left: 10px; gap: 5px; flex-wrap: wrap;">
+									<label><input id="normal_tick" type="checkbox" checked />法线</label>
+									<label><input id="displacement_tick" type="checkbox" checked />置换</label>
+									<label><input id="ambient_tick" type="checkbox" checked />环境光</label>
+									<label><input id="specular_tick" type="checkbox" checked />高光</label>
+									<label><input id="roughness_tick" type="checkbox" />粗糙度</label>
+									<label><input id="metallic_tick" type="checkbox" />金属度</label>
+								</div>
+							</td>
+					</tr>
+				</table>
+			</div>
+
+			<div id="batch_mode_help" style="display:none;overflow:hidden;font-family:Georgia" align="left">
+				<h1>批量模式</h1>
+
+				<p>
+					用它可以一次为多张高度图生成贴图。</br>
+					试试看！
+				</p>
+			</div>
+
+			
+			<!-- DESCRIPTION HEIGHT MAP -->
+
+			<div id="heightmap_help" style="display:none;overflow:hidden;font-family:Georgia" align="left">					
+				<h1>高度图</h1>
+				
+				<p>
+					<img src="images/description_height.png" style=" 
+					margin-left: auto; margin-right: auto; padding-left: 20px;" align="right" />
+
+					这张贴图记录的是距离“地面”的“高度”。
+					像素越亮，表示离得越远（越深）。
+					<br/>
+					在这个程序里，数值反了也没关系，之后随时可以改。
+					真正重要的是像素之间的数值差异。
+					<br/>
+
+					最理想的是边长为 2 的幂的贴图（2、4、8……256、512 等）。
+				</p>
+				<br/>
+				<br/>
+				<br/>
+				<hr/>
+				<p>
+					如果把高度图当作置换贴图使用，
+					可以很直观地看到它在表面上的效果。
+					下图从左到右依次是高度图示例、向内凸起（右上）
+					和向外凸起（右下）。
+				</p>
+				<img src="images/example_height.png" style="display: block; 
+				margin-left: auto; margin-right: auto;" />
+			</div>
+
+			<div id="photo_help" style="display:none;overflow:hidden;font-family:Georgia" align="left">					
+				<h1>用照片生成法线贴图</h1>
+				<p style="width:500px">
+					要用照片生成法线贴图，需要同一表面的四张照片，每张的光照方向都不同。<br/>
+					光线应分别从画面的上方、左侧、右侧和下方照过来。<br/>
+					为此你需要一台普通相机、一个手电筒，有条件的话再加一个三脚架。
+					如果没有用三脚架，拍完大概需要先对齐并裁剪。
+				</p>
+				<img src="images/light_directions.png" style="display: block; margin-left: auto; margin-right: auto;" />
+				<p style="width:500px">
+					把这四张照片分别拖到左侧视图的四个位置上。
+					也可以点击每个格子来选择文件。<br/>
+					注意：视图里标示的光源位置在正中间！<br/>
+					另外，四张照片的分辨率必须一致。
+				</p>
+				<div style="text-align: center">
+					<img src="images/picture_arranged.PNG" style="display: inline-block; margin-left: auto; margin-right: auto;" />
+					<img src="images/normalmap_from_photos.png" style="display: inline-block; margin-left: auto; margin-right: auto;" />
+				</div>
+				<p style="width:500px">
+					生成出来的法线贴图效果还不错（照片上是我家的浴室地垫……）。
+					生成之后再微调参数，效果会更好。<br/>
+					<br/>
+					<b>注意：</b>
+					最好用三脚架拍摄，另外别忘了额外拍一张用于漫反射贴图的照片。
+				</p>
+			</div>
+
+		<!-- 下载区（1.1.2 从左列底部搬来）：文件名/格式/不透明度/下载/全部/导出清单 -->
+		<div id="download_box">
+			<input id="file_name" type="text" placeholder="NormalMap" size="12">
+			<select id="file_type" onChange="NMO_Main.switchJPGQual();">
+				<option value="png" selected>PNG</option>
+				<option value="jpg">JPG</option>
+				<option value="tiff">TIFF</option>
+			</select>
+
+			<div style="min-height:3px"></div>
+			<div id="file_jpg_qual" style="display:none;">
+				质量 <input type="number" id="file_jpg_qual_nmb" step="1" style="width:40px;" min='0' max='100' value="95" size="4" > %
+			</div>
+			<div id="total_transparency" style="font-size:11px;">
+				不透明度 <input type="number" id="transparency_nmb" step="1" style="width:40px;" value='100' max='100' min='0'> %
+			</div>
+			<div style="min-height:8px"></div>
+			<button id="download" class="download" style="width: 8em;  height: 2em;"><b>下载</b></button>
+			<button id="download_all" class="download" style="width: 5em;  height: 2em;"><b>全部</b></button>
+			<div style="min-height:6px"></div>
+			<button id="export_plan_btn" class="download" style="width: 12.4em; height: 2em;" title="先看清单：源图、基础名和贴图用途">
+				<b>导出清单…</b>
+			</button>
+		</div>
+
+		<!-- 拖放提示（1.1.4：与下载区互换位置，现在贴着下面的高度图预览） -->
+		<div class="drop_row" id="drop_area" title="点击选择高度图，或把文件拖进来"
+			onclick="document.getElementById('select_file_height').click()">
+			<div class="drop_hint">
+				<span>点击或</span>
+				<span>拖放文件</span>
+				<span class="drop_hint_arrow">▼</span>
+			</div>
+		</div>
+
+		</div><!-- /cell--inputs -->
+
+		<!-- 右列上：预设与编号库（原来挤在 PBR 面板里，用户不知道是做什么的） -->
+		<div class="cell cell--library" id="cell_library">
+			<h3 class="cell_title">材质预设</h3>
+
+			<p class="cell_note">预设＝把当前粗糙度/金属度参数存成一个名字，下次一键套用。选择预设可恢复已保存的参数。</p>
+			<div class="side_row">
+				<select id="preset_select" class="pbr_select"><option value="">（无）</option></select>
+			</div>
+			<div class="side_row">
+				<input id="preset_name" type="text" class="side_input" placeholder="预设名" maxlength="40">
+				<button id="preset_save" class="pbr_btn" type="button" title="用当前参数新建/覆盖同名预设">保存</button>
+				<button id="preset_apply" class="pbr_btn" type="button" title="把选中预设的参数套用到当前设置">应用</button>
+			</div>
+			<div class="side_row">
+				<button id="preset_rename" class="pbr_btn" type="button" title="给选中的预设改名">预设改名</button>
+				<button id="preset_delete" class="pbr_btn" type="button" title="删除选中的预设">删除</button>
+			</div>
+
+			<!-- 3D 预览设置（1.1.2：从横贯整行的工具条收进右栏，
+			     位置在“预设与编号”下面、3D 预览正上方。控件与 id 全部保留） -->
+			<div class="cell--3dtools" id="cell_3dtools">
+			<span class="d3_tools_label">3D 预览 <i>（拖动可旋转）</i></span>
+			<div class="d3_tools">
+				<div class="d3_row">
+					<span class="d3_label">模型</span>
+					<select id="model" onchange="NMO_RenderView.setModel(document.getElementById('model').value)">
+						<option selected value="Cube">立方体</option>
+						<option value="Plane">平面</option>
+						<option value="Sphere">球体</option>
+						<option value="Cylinder">圆柱</option>
+						<option value="Teapot">茶壶</option>
+						<option value="Custom">自定义</option>
+					</select>
+					<input id="select_model_file" type="file" accept=".obj" onpropertychange="NMO_FileDrop.handleModelFileSelect()" style="position:absolute;visibility:hidden;"/>
+					<input type="button" id="browseModelButton" value="载入 .obj" onclick="select_model_file.click();">
+					<!-- 自动旋转开关（1.1.9）：默认关闭，模型静止，只用鼠标拖动；
+					     保留 input_rot 这个 id 与 checkbox 语义，测试与旧逻辑都还认它 -->
+					<label class="d3_switch" id="rot_switch" title="打开后模型自动旋转；关闭后静止，可用鼠标拖动查看">
+						<input id="input_rot" type="checkbox" value="rotation" onchange="NMO_RenderView.setRotationEnabled(this.checked)">
+						<span class="d3_switch_track"><span class="d3_switch_knob"></span></span>
+						<span class="d3_switch_text" id="rot_switch_text">自动旋转 · 关</span>
+					</label>
+				</div>
+
+				<div class="d3_row">
+					<span class="d3_label">材质</span>
+					<label class="d3_check"><input id="input_diffuse" type="checkbox" value="Diffuse" onclick="NMO_RenderView.toggleDiffuse()" disabled>漫反射</label>
+					<input id="select_diffuse_file" type="file" accept="image/*, .tga" onpropertychange="handleDiffuseFileSelect()" style="position:absolute;visibility:hidden;"/>
+					<input type="button" id="browseDiffuseButton" value="载入…" onclick="select_diffuse_file.click();">
+					<label class="d3_check"><input id="input_displacement" type="checkbox" value="displacement" onclick="NMO_RenderView.setDisplacement(document.getElementById('input_displacement').checked)" checked>置换</label>
+					<input id="dm_strength_slider" class="d3_slider" type="range" value='0.3' min='-1' max='1' step='0.01'
+						onchange="NMO_DisplacementMap.setDisplaceStrength(this.value); document.getElementById('dm_strength_nmb').value = this.value;"
+						oninput="NMO_DisplacementMap.setDisplaceStrength(this.value); document.getElementById('dm_strength_nmb').value = this.value;"/>
+					<input id="dm_strength_nmb" type="number" step="0.01" style="width:44px;" value='0.3'
+						onchange="NMO_DisplacementMap.setDisplaceStrength(this.value); document.getElementById('dm_strength_slider').value = this.value;">
+				</div>
+
+				<div class="d3_row">
+					<span class="d3_label">显示</span>
+					<label class="d3_check"><input id="input_normal" type="checkbox" value="normal" onclick="NMO_RenderView.toggleNormal()" checked>法线</label>
+					<label class="d3_check"><input id="input_ao" type="checkbox" value="ao" onclick="NMO_RenderView.toggleAO()" checked>AO</label>
+					<label class="d3_check"><input id="input_specular" type="checkbox" value="specular" onclick="NMO_RenderView.toggleSpecular()" checked>高光</label>
+					<label class="d3_check"><input id="input_enviroment" type="checkbox" value="normal" onclick="NMO_RenderView.setEnvironment(document.getElementById('input_enviroment').checked)">环境贴图</label>
+					<label class="d3_check"><input id="pbr_preview_toggle" type="checkbox" onclick="NMO_PBRPreview.setEnabled(this.checked); NMO_PBR.refresh();">PBR 预览</label>
+				</div>
+			</div>
+			</div><!-- /cell--3dtools -->
+		</div><!-- /cell--library -->
+
+		<!-- 预览行：高度图 / 照片 -->
+		<div class="cell cell--heightmap" id="cell_heightmap">
+			<div class="tabs" id="height_tabs">
+				<input class="tab_button" id="tab_btn_heightmap" type="button" value="高度图" onclick="NMO_Main.activate_height_tab('height')" disabled />
+				<input class="tab_button" id="tab_btn_pictures" type="button" value="照片" onclick="NMO_Main.activate_height_tab('pictures')" />
+				<!--
+				<input class="tab_button" style="color: #888888; border: 2px solid #666666;" id="tab_btn_photo" type="button" value="Photo"/>
+
+				<input class="tab_button" id="tab_btn_heightmap" type="button" disabled value="HeightMap" onclick="activate_height_tab('height')"/>
+				<input class="tab_button" id="tab_btn_photo"     type="button" value="Photo" onclick="activate_height_tab('photo'); reconstruct_depth();"/>
+				-->
+				
+			</div>			
+			<div class="view" id="height_map" style="display: inline-block;">
+				<input id="select_file_height" type="file" accept="image/*, .tga" onpropertychange="handleFileSelect()" style="position:absolute;visibility:hidden;"/>
+				<canvas id="height_canvas" onclick="select_file_height.click()" onmouseover="" style="cursor: pointer;"></canvas>
+			</div>
+			<div class="view" id="pictures_map" style="display: inline-block; display:none;">
+				<input id="select_file_above" type="file" accept="image/*, .tga" onpropertychange="handleFileSelect()" style="position:absolute;visibility:hidden;"/>
+				<input id="select_file_left"  type="file" accept="image/*, .tga" onpropertychange="handleFileSelect()" style="position:absolute;visibility:hidden;"/>
+				<input id="select_file_right" type="file" accept="image/*, .tga" onpropertychange="handleFileSelect()" style="position:absolute;visibility:hidden;"/>
+				<input id="select_file_below" type="file" accept="image/*, .tga" onpropertychange="handleFileSelect()" style="position:absolute;visibility:hidden;"/>
+				<div class="pictures_view">
+					<div class="pictures_view_row">
+						<div class="pictures_view_cell">
+							
+						</div>
+						<div class="pictures_view_cell drop_cell" id="picture_below_drop">
+							<canvas id="picture_canvas_below" style="width:100%; height: 100%; cursor: pointer;" onclick="select_file_below.click()" onmouseover=""></canvas>
+						</div>
+					</div>
+					<div class="pictures_view_row">
+						<div class="pictures_view_cell drop_cell" id="picture_right_drop">
+							<canvas id="picture_canvas_right" style="width:100%; height: 100%; cursor: pointer;" onclick="select_file_right.click()" onmouseover=""></canvas>
+						</div>
+						<div class="pictures_view_cell">
+							
+						</div>
+						
+						<div class="pictures_view_cell drop_cell" id="picture_left_drop">
+							<canvas id="picture_canvas_left" style="width:100%; height: 100%; cursor: pointer;" onclick="select_file_left.click()" onmouseover=""></canvas>
+						</div>
+						
+					</div>
+					<div class="pictures_view_row">
+						<div class="pictures_view_cell">
+							
+						</div>
+						<div class="pictures_view_cell drop_cell" id="picture_above_drop">
+							<canvas id="picture_canvas_above" style="width:100%; height: 100%; cursor: pointer;" onclick="select_file_above.click()" onmouseover=""></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="view" id="photo_map" style="display: none;">
+				<canvas id="photo_canvas"></canvas>
+			</div>
+			
+			<!-- 尺寸行：问号/叹号（1.1.2 从左上拖放区搬到这儿） -->
+			<div id="size_row">
+				<span>尺寸：</span>
+				<input style="border: none; color:white; background-color: transparent; border-color: transparent;" id="size" type="text" size="30" maxlength="30" readonly>
+				<span class="size_help">
+					<a class="various" href="#heightmap_help" title="高度图是什么">
+						<img src="images/help.png" />
+					</a>
+					<a class="various" href="#photo_help" title="用照片生成">
+						<img src="images/attention.png" />
+					</a>
+				</span>
+			</div>
+			
+			
+		</div>
+		<!--</div>-->
+		
+		
+		
+		<!-- Texture -->
+		<div class="cell cell--params" id="cell_params">
+		
+			<!-- Normal Settings -->
+			<div class="column_top" id="normal_settings" style="width:100%;">
+				<table class="options_top">
+				<tr>
+					<td class="option_text">
+						<span> 强度</span>
+					</td>
+					<td class="options">
+						<input id="strength_slider" 
+								onchange="NMO_NormalMap.setNormalSetting('strength', this.value); document.getElementById('strength_nmb').value = this.value;"
+								oninput="NMO_NormalMap.setNormalSetting('strength', this.value); document.getElementById('strength_nmb').value = this.value;"
+								style="width:54%;"
+								type="range"  value='2.5' min='0.01' max='5' step='0.01'/>
+						<input id="strength_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" 
+								value='2.5' min='0.01' max='5' 
+								onchange="NMO_NormalMap.setNormalSetting('strength', this.value); document.getElementById('strength_slider').value = this.value;">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span >层级</span>
+					</td>
+					<td class="options">
+						<input id="level_slider" 
+								onchange="NMO_NormalMap.setNormalSetting('level', this.value);  document.getElementById('level_nmb').value = this.value;"
+								oninput="NMO_NormalMap.setNormalSetting('level', this.value);  document.getElementById('level_nmb').value = this.value;"
+								style="width:54%;"
+								type="range" value='7.0' min='4' max='10' step='0.1'/>
+						<input id="level_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='7.0'
+								onchange="NMO_NormalMap.setNormalSetting('level', this.value); document.getElementById('level_slider').value = this.value;">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>模糊/锐化</span>
+					</td>
+					<td class="options">
+						<input id="blur_sharp_slider" 
+								onchange="NMO_NormalMap.setNormalSetting('blur_sharp', this.value); document.getElementById('blur_sharp_nmb').value = this.value;"
+								oninput="NMO_NormalMap.setNormalSetting('blur_sharp', this.value); document.getElementById('blur_sharp_nmb').value = this.value;"
+								style="width:54%;"
+								type="range" value='0' min='-32' max='32' step='1'/>
+						<input id="blur_sharp_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='0'
+								onchange="NMO_NormalMap.setNormalSetting('blur_sharp', this.value); document.getElementById('blur_sharp_slider').value = this.value;">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>滤镜</span>
+					</td>
+					<td class="options">
+						<div>
+							<select id="normal_type" onChange="NMO_NormalMap.setNormalSetting('type', this.options[this.selectedIndex].value)">
+								<option value="sobel">Sobel</option>
+								<option value="scharr">Scharr</option>
+							</select>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>反相</span>
+					</td>
+					<td class="options">
+						<div>
+							<input id="invert_r" type="checkbox" onclick="NMO_NormalMap.invertRed()" />R
+							<input id="invert_g" type="checkbox" onclick="NMO_NormalMap.invertGreen()" />G
+							<input id="invert_height" type="checkbox" onclick="NMO_NormalMap.invertSource()" />高度
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>Z 范围</span>
+					</td>
+					<td class="options">
+						<div>
+							<input id="height_offset" type="checkbox" onclick="NMO_NormalMap.heightOffset()" checked="true" />-1 到 +1
+						</div>
+					</td>
+				</tr>
+				
+				</table>
+			</div>
+						
+			<!-- Displacement Settings -->
+			<div class="column_top" id="displacement_settings" style="display: none;width:100%;">
+				<table class="options_top">
+				<tr>
+					<td class="option_text">
+						<span>对比度</span>
+					</td>
+					<td class="options">
+						<input id="dm_contrast_slider" 
+							onchange="NMO_DisplacementMap.setDisplacementSetting('contrast', this.value); document.getElementById('dm_contrast_nmb').value = this.value;"
+							oninput="NMO_DisplacementMap.setDisplacementSetting('contrast', this.value); document.getElementById('dm_contrast_nmb').value = this.value;"
+							style="width:54%;"
+							type="range" value='-0.5' min='-1' max='1' step='0.01'/>
+						<input id="dm_contrast_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='-0.5'
+							onchange="document.getElementById('dm_contrast_slider').value = this.value;NMO_DisplacementMap.setDisplacementSetting('contrast', this.value);">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>模糊/锐化</span>
+					</td>
+					<td class="options">
+						<input id="dm_blur_sharp_slider" 
+								onchange="NMO_DisplacementMap.setDisplacementSetting('blur_sharp', this.value); document.getElementById('dm_blur_sharp_nmb').value = this.value;"
+								oninput="NMO_DisplacementMap.setDisplacementSetting('blur_sharp', this.value); document.getElementById('dm_blur_sharp_nmb').value = this.value;"
+								style="width:54%;"
+								type="range" value='0' min='-32' max='32' step='1'/>
+						<input id="dm_blur_sharp_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='0'
+								onchange="NMO_DisplacementMap.setDisplacementSetting('blur_sharp', this.value); document.getElementById('dm_blur_sharp_slider').value = this.value;">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>反相</span>
+					</td>
+					<td class="options">
+						<div>
+							<input id="invert_displacement" type="checkbox" onclick="NMO_DisplacementMap.invertDisplacement(); NMO_DisplacementMap.setDisplacementContrast(document.getElementById('dm_contrast_nmb').value);" />
+						</div>
+					</td>
+				</tr>
+				<!--
+				<tr>
+					<td>
+						<span style="width:70px;display:inline-block;vertical-align:top;padding-right:30px;text-align:left;">Resolution:</span>
+					</td>
+					<td>
+						<input id="dm_res_slider" 
+							onchange="setDisplacementResolution(this.value); document.getElementById('dm_res_nmb').value = Math.pow(2, this.value);"
+							oninput="setDisplacementResolution(this.value); document.getElementById('dm_res_nmb').value = Math.pow(2, this.value);"
+							style="width:80px;"
+							type="range" value='7' min='2' max='8' step='1'/>
+						<input id="dm_res_nmb" type="number" step="1" style="width:45px;vertical-align:top;" value='128'
+							onchange="setDisplaceSetting('strength', this.value); document.getElementById('dm_res_slider').value = Math.sqrt(this.value);">
+					</td>
+				
+				</tr>
+				-->
+				</table>
+			</div>
+			
+			<!-- Ambient Occlusion Settings -->
+			<div class="column_top" id="ao_settings" style="display: none;width:100%;">
+				<table class="options_top">
+					<tr>
+						<td class="option_text">
+							<span> 强度</span>
+						</td>
+						<td class="options">
+							<input id="ao_strength_slider"
+									onchange="NMO_AmbientOccMap.setAOSetting('strength', this.value); document.getElementById('ao_strength_nmb').value = this.value;"
+									oninput="NMO_AmbientOccMap.setAOSetting('strength', this.value); document.getElementById('ao_strength_nmb').value = this.value;"
+									style="width:54%;"
+									type="range"  value='0.5' min='0' max='1' step='0.01'/>
+							<input id="ao_strength_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='0.5'
+									onchange="NMO_AmbientOccMap.setAOSetting('strength', this.value); document.getElementById('ao_strength_slider').value = this.value;">
+						</td>
+					</tr>
+					<tr>
+						<td class="option_text">
+							<span>均值</span>
+						</td>
+						<td class="options">
+							<input id="ao_mean_slider"
+									onchange="NMO_AmbientOccMap.setAOSetting('mean', this.value); document.getElementById('ao_mean_nmb').value = this.value;"
+									oninput="NMO_AmbientOccMap.setAOSetting('mean', this.value); document.getElementById('ao_mean_nmb').value = this.value;"
+									style="width:54%;"
+									type="range"  value='1' min='0' max='1' step='0.01'/>
+							<input id="ao_mean_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='1'
+									onchange="NMO_AmbientOccMap.setAOSetting('mean', this.value); document.getElementById('ao_mean_slider').value = this.value;">
+						</td>
+					</tr>
+					<tr>
+						<td class="option_text">
+							<span>范围</span>
+						</td>
+						<td class="options">
+							<input id="ao_range_slider"
+									onchange="NMO_AmbientOccMap.setAOSetting('range', this.value); document.getElementById('ao_range_nmb').value = this.value;"
+									oninput="NMO_AmbientOccMap.setAOSetting('range', this.value); document.getElementById('ao_range_nmb').value = this.value;"
+									style="width:54%;"
+									type="range" value='1' min='0' max='1' step='0.01'/>
+							<input id="ao_range_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='1'
+									onchange="NMO_AmbientOccMap.setAOSetting('range', this.value); document.getElementById('ao_range_slider').value = this.value;">
+						</td>
+					</tr>
+					<tr>
+						<td class="option_text">
+							<span>模糊/锐化</span>
+						</td>
+						<td class="options">
+							<input id="ao_blur_sharp_slider"
+									onchange="NMO_AmbientOccMap.setAOSetting('blur_sharp', this.value); document.getElementById('ao_blur_sharp_nmb').value = this.value;"
+									oninput="NMO_AmbientOccMap.setAOSetting('blur_sharp', this.value); document.getElementById('ao_blur_sharp_nmb').value = this.value;"
+									style="width:54%;"
+									type="range" value='0' min='-32' max='32' step='1'/>
+							<input id="ao_blur_sharp_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='0'
+									onchange="NMO_AmbientOccMap.setAOSetting('blur_sharp', this.value); document.getElementById('ao_blur_sharp_slider').value = this.value;">
+						</td>
+					</tr>
+					<tr>
+						<td class="option_text">
+							<span>反相</span>
+						</td>
+						<td class="options">
+							<div>
+								<input id="invert_AO" type="checkbox" onclick="NMO_AmbientOccMap.invertAO();" />
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<!-- Specular Settings -->
+			<div class="column_top" id="specular_settings" style="display: none;width:100%;">
+				<table class="options_top">
+					<tr>
+						<td class="option_text">
+							<span>强度</span>
+						</td>
+						<td class="options">
+							<input id="specular_strength_slider"
+									onchange="NMO_SpecularMap.setSpecularSetting('spec_strength', this.value); document.getElementById('specular_strength_nmb').value = this.value;"
+									oninput="NMO_SpecularMap.setSpecularSetting('spec_strength', this.value); document.getElementById('specular_strength_nmb').value = this.value;"
+									style="width:54%;"
+									type="range"  value='1' min='0' max='1' step='0.01'/>
+							<input id="specular_strength_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='1'
+									onchange="NMO_SpecularMap.setSpecularSetting('spec_strength', this.value); document.getElementById('specular_strength_slider').value = this.value;">
+						</td>
+					</tr>
+					<tr>
+						<td class="option_text">
+							<span>均值</span>
+						</td>
+						<td class="options">
+							<input id="specular_mean_slider"
+									onchange="NMO_SpecularMap.setSpecularSetting('spec_mean', this.value); document.getElementById('specular_mean_nmb').value = this.value;"
+									oninput="NMO_SpecularMap.setSpecularSetting('spec_mean', this.value); document.getElementById('specular_mean_nmb').value = this.value;"
+									style="width:54%;"
+									type="range"  value='1' min='0' max='1' step='0.01'/>
+							<input id="specular_mean_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='1'
+									onchange="NMO_SpecularMap.setSpecularSetting('spec_mean', this.value); document.getElementById('specular_mean_slider').value = this.value;">
+						</td>
+					</tr>
+					<tr>
+						<td class="option_text">
+							<span>范围</span>
+						</td>
+						<td class="options">
+							<input id="specular_range_slider"
+									onchange="NMO_SpecularMap.setSpecularSetting('spec_range', this.value); document.getElementById('specular_range_nmb').value = this.value;"
+									oninput="NMO_SpecularMap.setSpecularSetting('spec_range', this.value); document.getElementById('specular_range_nmb').value = this.value;"
+									style="width:54%;"
+									type="range" value='1' min='0' max='1' step='0.01'/>
+							<input id="specular_range_nmb" type="number" step="0.01" style="width:26%;vertical-align:top;" value='1'
+									onchange="NMO_SpecularMap.setSpecularSetting('spec_range', this.value); document.getElementById('specular_range_slider').value = this.value;">
+						</td>
+					</tr>
+					<tr>
+						<td class="option_text">
+							<span>衰减</span>
+						</td>
+						<td class="options">
+							<div>
+								<select id="falloff_type" onChange="NMO_SpecularMap.setSpecularSetting('spec_falloff', this.options[this.selectedIndex].value)">
+									<option value="no">无</option>
+									<option value="linear" selected>线性</option>
+									<option value="square">平方</option>
+								</select>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<!-- Roughness Settings（1.1.1：并入参数框，强度/上下限改滑块） -->
+			<div class="column_top" id="roughness_settings" style="display:none;width:100%;">
+				<table class="options_top">
+				<tr>
+					<td class="option_text">
+						<span>来源</span>
+					</td>
+					<td class="options">
+						<!-- 1.1.6：导入贴图挪到来源行右端（用户截图的红框），让出下面一行给“预设” -->
+						<div class="source_row">
+							<select id="rough_mode" class="pbr_select">
+								<option value="uniform">统一数值</option>
+								<option value="source">源图辅助</option>
+								<option value="imported">导入贴图</option>
+								<option value="mixed">贴图 + 源图</option>
+							</select>
+							<button id="rough_import" class="pbr_btn" type="button" title="导入一张自己的黑白遮罩（TGA / PNG / JPG）">导入贴图…</button>
+							<input id="rough_file" type="file" accept="image/*,.tga" style="position:absolute;visibility:hidden;">
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text" title="源图辅助：合成结果的中值；导入贴图 / 贴图+源图：把遮罩整体抬到这个中值">
+						<span>基础值</span>
+					</td>
+					<td class="options">
+						<input id="rough_value" style="width:54%;" type="range" min="0" max="1" step="0.01" value="0.5"/>
+						<input id="rough_value_nmb" type="number" style="width:26%;vertical-align:top;" min="0" max="1" step="0.01" value="0.5">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text" title="源图辅助：源图明暗/细节的增益；导入贴图：对比（0＝原样，1＝三倍）；贴图+源图：叠加多少源图细节">
+						<span>强度</span>
+					</td>
+					<td class="options">
+						<input id="rough_strength" style="width:54%;" type="range" min="0" max="3" step="0.01" value="0"/>
+						<input id="rough_strength_nmb" type="number" style="width:26%;vertical-align:top;" min="0" max="3" step="0.01" value="0">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>细节来源</span>
+					</td>
+					<td class="options">
+						<select id="rough_detail" class="pbr_select">
+							<option value="gray">灰度变化</option>
+							<option value="detail">局部细节</option>
+						</select>
+						<label class="pbr_check">反转 <input id="rough_invert" type="checkbox"></label>
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>下限</span>
+					</td>
+					<td class="options">
+						<input id="rough_min" style="width:54%;" type="range" min="0" max="1" step="0.01" value="0"/>
+						<input id="rough_min_nmb" type="number" style="width:26%;vertical-align:top;" min="0" max="1" step="0.01" value="0">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>上限</span>
+					</td>
+					<td class="options">
+						<input id="rough_max" style="width:54%;" type="range" min="0" max="1" step="0.01" value="1"/>
+						<input id="rough_max_nmb" type="number" style="width:26%;vertical-align:top;" min="0" max="1" step="0.01" value="1">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>预设</span>
+					</td>
+					<td class="options">
+						<!-- 1.1.6：原来“导入贴图…”的位置换成内置遮罩预设，选项由 mask-presets.js 填 -->
+						<select id="rough_preset" class="pbr_select" title="内置十张黑白遮罩；选中后来源自动切到“导入贴图”">
+							<option value="">选择预设…</option>
+						</select>
+					</td>
+				</tr>
+				</table>
+			</div>
+
+			<!-- Metallic Settings -->
+			<div class="column_top" id="metallic_settings" style="display:none;width:100%;">
+				<table class="options_top">
+				<tr>
+					<td class="option_text">
+						<span>来源</span>
+					</td>
+					<td class="options">
+						<select id="metal_mode" class="pbr_select">
+							<option value="none">非金属</option>
+							<option value="full">裸金属</option>
+							<option value="rough">复用粗糙度遮罩</option>
+							<option value="mask">导入遮罩</option>
+						</select>
+						<label class="pbr_check">反转 <input id="metal_invert" type="checkbox"></label>
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>下限</span>
+					</td>
+					<td class="options">
+						<input id="metal_min" style="width:54%;" type="range" min="0" max="1" step="0.01" value="0"/>
+						<input id="metal_min_nmb" type="number" style="width:26%;vertical-align:top;" min="0" max="1" step="0.01" value="0">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>上限</span>
+					</td>
+					<td class="options">
+						<input id="metal_max" style="width:54%;" type="range" min="0" max="1" step="0.01" value="1"/>
+						<input id="metal_max_nmb" type="number" style="width:26%;vertical-align:top;" min="0" max="1" step="0.01" value="1">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>阈值</span>
+					</td>
+					<td class="options">
+						<input id="metal_threshold" style="width:54%;" type="range" min="0" max="1" step="0.01" value="0"/>
+						<input id="metal_threshold_nmb" type="number" style="width:26%;vertical-align:top;" min="0" max="1" step="0.01" value="0">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text">
+						<span>柔边</span>
+					</td>
+					<td class="options">
+						<input id="metal_softness" style="width:54%;" type="range" min="0" max="1" step="0.01" value="0"/>
+						<input id="metal_softness_nmb" type="number" style="width:26%;vertical-align:top;" min="0" max="1" step="0.01" value="0">
+					</td>
+				</tr>
+				<tr>
+					<td class="option_text"></td>
+					<td class="options">
+						<button id="metal_import" class="pbr_btn" type="button">导入遮罩…</button>
+						<input id="metal_file" type="file" accept="image/*,.tga" style="position:absolute;visibility:hidden;">
+					</td>
+				</tr>
+				</table>
+			</div>
+
+			<div class="pbr_row pbr_resample" id="pbr_resample" hidden>
+				<span id="pbr_resample_text"></span>
+				<button id="pbr_resample_ok" class="pbr_btn" type="button">重采样到源图尺寸</button>
+				<button id="pbr_resample_cancel" class="pbr_btn" type="button">取消导入</button>
+			</div>
+
+			<!-- 恢复默认 / ORM 打包：同一个右下角，外观一致 -->
+			<div id="reset_row">
+				<button id="orm_toggle" type="button" aria-pressed="false" disabled
+					title="同时勾选 AO、粗糙度、金属度后才能启用">ORM 打包</button>
+				<button id="reset_btn" type="button" onclick="NMO_Main.resetCurrentSettings()">恢复默认</button>
+			</div>
+			<div id="pbr_status" class="pbr_hint">R=AO / G=粗糙度 / B=金属度</div>
+		</div><!-- /cell--params -->
+
+		<!-- 预览行：贴图预览（六个选项卡） -->
+		<div class="cell cell--texture" id="cell_texture">
+			<!-- Textures -->
+			<div class="texture_container">
+				<div class="tabs">
+					<input class="tab_button" id="tab_btn_normal" type="button" onclick="NMO_Main.activate_texture('normal');" disabled value="法线"/>
+					<input class="tab_button" id="tab_btn_displace" type="button" onclick="NMO_Main.activate_texture('displace');" value="置换"/>
+					<input class="tab_button" id="tab_btn_ao" type="button" onclick="NMO_Main.activate_texture('ao');" value="环境光"/>
+					<input class="tab_button" id="tab_btn_specular" type="button" onclick="NMO_Main.activate_texture('specular');" value="高光"/>
+					<input class="tab_button" id="tab_btn_roughness" type="button" onclick="NMO_Main.activate_texture('roughness');" value="粗糙度"/>
+					<input class="tab_button" id="tab_btn_metallic" type="button" onclick="NMO_Main.activate_texture('metallic');" value="金属度"/>
+				</div>
+				<!-- Normal Texture -->
+				<div class="view" id="normal_map">
+					<span class="helper"></span><canvas class="preview_img" id="normal_img" />
+				</div>
+				
+				<!-- Displacement Texture -->
+				<div class="view" id="displacement_map" style="display: none;">
+					<span class="helper"></span><canvas class="preview_img" id="displace_img" />
+				</div>
+				
+				<!-- Ambient Occlusion Texture -->
+				<div class="view" id="ao_map" style="display: none;">
+					<span class="helper"></span><canvas class="preview_img" id="ao_img" />
+				</div>
+
+				<!-- Specular Texture -->
+				<div class="view" id="specular_map" style="display: none;">
+					<span class="helper"></span><canvas class="preview_img" id="specular_img" />
+				</div>
+
+				<!-- Roughness Texture -->
+				<div class="view" id="roughness_map" style="display: none;">
+					<span class="helper"></span><canvas class="preview_img" id="roughness_img" />
+				</div>
+
+				<!-- Metallic Texture -->
+				<div class="view" id="metallic_map" style="display: none;">
+					<span class="helper"></span><canvas class="preview_img" id="metallic_img" />
+				</div>
+			</div>
+			
+			<!-- Autoupdate stuff -->
+			<!--<div style="min-height:15px;margin-top:-10px;">
+				<input id="auto_update" type="checkbox" onclick="toggleAutoUpdate();document.getElementById('update').disabled = auto_update;" checked />Auto update
+				<input id="update" type="button" onclick="updateCurrentTexture();" value="Update" disabled />
+			</div>-->
+		</div>
+		
+		
+		<!-- 右列下：3D 预览（设置压成三行，控件与 id 全部保留） -->
+		<div class="cell cell--3d" id="cell_3d">
+			<div class="view" id="render_view">
+				<a class="render_magnifier big_preview" href="#renderBig">
+					<img src="images/iconmonstr-magnifier-6-icon-16.png" />
+				</a>
+			</div>
+
+			<div id="renderBig" style="display:none;overflow:hidden;"></div>
+		</div>
+	</div><!-- /content -->
+
+	<div class="texture_link">
+		需要贴图？<br/>
+		<a href="http://cpetry.github.io/TextureGenerator-Online/">
+			<img src="images/external/texture-logo.png" style="padding-top:5px"/>
+		</a>
+	</div>
+
+</body>
+<footer>
+		<p>版权信息：Christian Petry, Am Gänsweiher 8, 91486 Uehlfeld, Germany
+		<br/>
+		环境贴图来源：<a href="http://www.humus.name/index.php?page=Textures">Humus</a>
+		</p>
+	</footer>
+	
+	
+<!-- Add jQuery library -->
+<script src="javascripts/extern/jquery-2.1.1.min.js"></script>
+<script src="javascripts/extern/jquery-ui.min.js"></script>
+
+
+<!-- Add fancyBox -->
+<link rel="stylesheet" href="javascripts/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+<script type="text/javascript" src="javascripts/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+<script src="javascripts/extern/three.min.js"></script>
+
+<script src="javascripts/extern/blob.js"></script>
+<script src="javascripts/extern/canvas-toBlob.js"></script>
+<script src="javascripts/extern/canvastotiff.min.js"></script>
+<script src="javascripts/extern/CopyShader.js"></script>
+<script src="javascripts/extern/filesaver.min.js"></script>
+<script src="javascripts/extern/EffectComposer.js"></script>
+<script src="javascripts/extern/MaskPass.js"></script>
+<script src="javascripts/extern/OBJLoader.js"></script>
+<script src="javascripts/extern/OrbitControls.js"></script>
+<script src="javascripts/extern/readTGA.js"></script>
+<script src="javascripts/extern/RenderPass.js"></script>
+<script src="javascripts/extern/ShaderPass.js"></script>
+<script src="javascripts/extern/TeapotBufferGeometry.js"></script>
+
+<script src="javascripts/shader/NormalMapShader.js"></script>
+<script src="javascripts/shader/NormalToHeightShader.js"></script>
+<script src="javascripts/shader/NormalMapFromPicturesShader.js"></script>
+<script src="javascripts/shader/AmbientOcclusionShader.js"></script>
+<script src="javascripts/shader/DisplacementShader.js"></script>
+<script src="javascripts/shader/SpecularShader.js"></script>
+<script src="javascripts/shader/HorizontalBlurShader.js"></script>
+<script src="javascripts/shader/VerticalBlurShader.js"></script>
+
+<script type="text/javascript" src="shared/output-names.js"></script>
+
+<script type="text/javascript" src="desktop/export-plan-dialog.js"></script>
+
+<script type="text/javascript" src="javascripts/filedrop.js"></script>
+<script type="text/javascript" src="javascripts/filters.js"></script>
+<script type="text/javascript" src="javascripts/renderView.js"></script>
+<script type="text/javascript" src="javascripts/renderNormalview.js"></script>
+<script type="text/javascript" src="javascripts/normalMap.js"></script>
+<script type="text/javascript" src="javascripts/displaceMap.js"></script>
+<script type="text/javascript" src="javascripts/ambientOccMap.js"></script>
+<script type="text/javascript" src="javascripts/specularMap.js"></script>
+<script type="text/javascript" src="javascripts/diffuseMap.js"></script>
+<script type="text/javascript" src="javascripts/pbrMaps.js"></script>
+<script type="text/javascript" src="javascripts/pbrPreview.js"></script>
+<script type="text/javascript" src="javascripts/main.js"></script>
+
+<!-- Desktop-only adapter: native save dialogs, export feedback, external links.
+     Loaded last so it can wrap the original export code without changing
+     anything above it. -->
+<script type="text/javascript" src="desktop/nmo-desktop-bridge.js"></script>
+<script type="text/javascript" src="desktop/mask-presets.js"></script>
+<script type="text/javascript" src="desktop/pbr-ui.js"></script>
+<script type="text/javascript" src="desktop/preview-sync.js"></script>
+<script type="text/javascript" src="desktop/presets-ui.js"></script>
+
+
+<script type="text/javascript" src="desktop/agent-api.js"></script>
+<script type="text/javascript" src="desktop/preview-zoom.js"></script>
+<script type="text/javascript" src="desktop/agent-badge.js"></script>
+
+</html>
